@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "google-drive": {
+      "command": "npx",
+      "args": ["@isaacphi/mcp-gdrive"],
+      "env": {
+        "GDRIVE_CREDS_DIR": "./config",
+        "CLIENT_ID": "${GOOGLE_CLIENT_ID}",
+        "CLIENT_SECRET": "${GOOGLE_CLIENT_SECRET}"
+      }
+    }
+  }
+}
