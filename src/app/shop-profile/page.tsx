@@ -56,6 +56,7 @@ export default function ShopProfilePage() {
 
     // Services
     services: ["Oil Change", "Brake Service", "Tire Rotation"],
+    customServices: [] as string[],
     specialties: "",
 
     // Pricing
@@ -95,6 +96,17 @@ export default function ShopProfilePage() {
     acceptedPayments: ["Cash", "Credit Card", "Debit Card"],
     creditCards: ["Visa", "Mastercard", "American Express"],
     paymentTerms: "Payment due upon completion",
+
+    // Business Payment Details (where shop receives money)
+    businessPaymentMethod: "card", // "card" or "bank"
+    businessCardNumber: "",
+    businessCardHolderName: "",
+    businessCardExpiry: "",
+    businessCardCvv: "",
+    businessBankName: "",
+    businessAccountNumber: "",
+    businessRoutingNumber: "",
+    businessAccountHolderName: "",
 
     // Team
     teamSize: "",
@@ -398,14 +410,30 @@ export default function ShopProfilePage() {
             title="Services & Specialties"
             description="What automotive services do you offer?"
           >
+            {/* Service Types */}
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-slate-800 mb-3">Service Types</h3>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="p-4 border border-blue-200 rounded-lg bg-blue-50/30">
+                  <h4 className="font-medium text-slate-800 mb-2">Basic Service</h4>
+                  <p className="text-sm text-slate-600">Oil change, fluid check, battery test, visual inspection</p>
+                </div>
+                <div className="p-4 border border-orange-200 rounded-lg bg-orange-50/30">
+                  <h4 className="font-medium text-slate-800 mb-2">Full Service</h4>
+                  <p className="text-sm text-slate-600">Basic service + 21-point inspection, tire rotation, brake check</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Services */}
             <FormField
-              label="Main Services"
-              description="Select the primary services you offer"
+              label="Services Offered"
+              description="Select the services your shop provides"
             >
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {[
                   "Oil Change",
-                  "Brake Service",
+                  "Brake Service", 
                   "Tire Rotation",
                   "Engine Diagnostic",
                   "Transmission Service",
@@ -419,7 +447,7 @@ export default function ShopProfilePage() {
                 ].map((service) => (
                   <label
                     key={service}
-                    className="flex items-center gap-2 p-3 rounded-lg border border-blue-200/50 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-orange-50/50 cursor-pointer transition-all"
+                    className="flex items-center gap-2 p-3 rounded-lg border border-slate-200 hover:bg-blue-50 cursor-pointer transition-all"
                   >
                     <input
                       type="checkbox"
@@ -445,8 +473,52 @@ export default function ShopProfilePage() {
               </div>
             </FormField>
 
+            {/* Custom Services */}
             <FormField
-              label="Specialties & Additional Information"
+              label="Additional Services"
+              description="Add any other services you offer"
+            >
+              <div className="space-y-2">
+                {formData.customServices && formData.customServices.map((service, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <EnhancedInput
+                      placeholder="Service name"
+                      value={service}
+                      onChange={(e) => {
+                        const updated = [...(formData.customServices || [])];
+                        updated[index] = e.target.value;
+                        updateFormData("customServices", updated);
+                      }}
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const updated = (formData.customServices || []).filter((_, i) => i !== index);
+                        updateFormData("customServices", updated);
+                      }}
+                      className="text-slate-600"
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    const current = formData.customServices || [];
+                    updateFormData("customServices", [...current, ""]);
+                  }}
+                  className="text-blue-600 border-blue-300"
+                >
+                  + Add Service
+                </Button>
+              </div>
+            </FormField>
+
+            <FormField
+              label="Specialties & Equipment"
               description="Describe any specialized services or equipment"
             >
               <EnhancedTextarea
@@ -736,6 +808,200 @@ export default function ShopProfilePage() {
                 </div>
               </FormField>
             )}
+
+            {/* Business Payment Details */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-8 rounded-2xl shadow-xl mt-8">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+                    <CreditCard className="h-6 w-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Payment Destination</h3>
+                    <p className="text-blue-100 text-sm">Where your earnings will be deposited</p>
+                  </div>
+                </div>
+
+                {/* Method Selection */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <label
+                    className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                      formData.businessPaymentMethod === "card"
+                        ? "border-white bg-white/20 shadow-lg"
+                        : "border-white/30 hover:border-white/50 hover:bg-white/10"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="businessPaymentMethod"
+                      value="card"
+                      checked={formData.businessPaymentMethod === "card"}
+                      onChange={(e) => updateFormData("businessPaymentMethod", e.target.value)}
+                      className="sr-only"
+                    />
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gradient-to-br from-orange-400 to-orange-500 rounded-lg">
+                        <CreditCard className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-white">Business Card</div>
+                        <div className="text-xs text-blue-100">Credit or debit card</div>
+                      </div>
+                    </div>
+                    {formData.businessPaymentMethod === "card" && (
+                      <div className="absolute top-3 right-3 w-3 h-3 bg-orange-400 rounded-full"></div>
+                    )}
+                  </label>
+
+                  <label
+                    className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                      formData.businessPaymentMethod === "bank"
+                        ? "border-white bg-white/20 shadow-lg"
+                        : "border-white/30 hover:border-white/50 hover:bg-white/10"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="businessPaymentMethod"
+                      value="bank"
+                      checked={formData.businessPaymentMethod === "bank"}
+                      onChange={(e) => updateFormData("businessPaymentMethod", e.target.value)}
+                      className="sr-only"
+                    />
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-gradient-to-br from-green-400 to-green-500 rounded-lg">
+                        <Building2 className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <div className="font-semibold text-white">Bank Account</div>
+                        <div className="text-xs text-blue-100">Direct deposit</div>
+                      </div>
+                    </div>
+                    {formData.businessPaymentMethod === "bank" && (
+                      <div className="absolute top-3 right-3 w-3 h-3 bg-green-400 rounded-full"></div>
+                    )}
+                  </label>
+                </div>
+
+                {/* Card Form */}
+                {formData.businessPaymentMethod === "card" && (
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                    <div className="space-y-5">
+                      <div className="relative">
+                        <label className="block text-sm font-medium text-white mb-2">Card Holder Name</label>
+                        <EnhancedInput
+                          placeholder="John Doe"
+                          value={formData.businessCardHolderName}
+                          onChange={(e) => updateFormData("businessCardHolderName", e.target.value)}
+                          className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-orange-400 focus:ring-orange-400/20"
+                        />
+                      </div>
+                      
+                      <div className="relative">
+                        <label className="block text-sm font-medium text-white mb-2">Card Number</label>
+                        <EnhancedInput
+                          placeholder="•••• •••• •••• 1234"
+                          value={formData.businessCardNumber}
+                          onChange={(e) => updateFormData("businessCardNumber", e.target.value)}
+                          maxLength={19}
+                          className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-orange-400 focus:ring-orange-400/20"
+                        />
+                        <div className="absolute right-3 top-10 flex gap-1">
+                          <div className="w-6 h-4 bg-white/30 rounded-sm"></div>
+                          <div className="w-6 h-4 bg-white/20 rounded-sm"></div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-white mb-2">Expiry</label>
+                          <EnhancedInput
+                            placeholder="MM/YY"
+                            value={formData.businessCardExpiry}
+                            onChange={(e) => updateFormData("businessCardExpiry", e.target.value)}
+                            maxLength={5}
+                            className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-orange-400 focus:ring-orange-400/20"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-white mb-2">CVV</label>
+                          <EnhancedInput
+                            placeholder="•••"
+                            value={formData.businessCardCvv}
+                            onChange={(e) => updateFormData("businessCardCvv", e.target.value)}
+                            maxLength={4}
+                            type="password"
+                            className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-orange-400 focus:ring-orange-400/20"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bank Form */}
+                {formData.businessPaymentMethod === "bank" && (
+                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                    <div className="space-y-5">
+                      <div>
+                        <label className="block text-sm font-medium text-white mb-2">Account Holder</label>
+                        <EnhancedInput
+                          placeholder="AutoServe Pro LLC"
+                          value={formData.businessAccountHolderName}
+                          onChange={(e) => updateFormData("businessAccountHolderName", e.target.value)}
+                          className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-green-400 focus:ring-green-400/20"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-white mb-2">Bank Name</label>
+                        <EnhancedInput
+                          placeholder="Chase Bank"
+                          value={formData.businessBankName}
+                          onChange={(e) => updateFormData("businessBankName", e.target.value)}
+                          className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-green-400 focus:ring-green-400/20"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-white mb-2">Account Number</label>
+                          <EnhancedInput
+                            placeholder="123456789"
+                            value={formData.businessAccountNumber}
+                            onChange={(e) => updateFormData("businessAccountNumber", e.target.value)}
+                            className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-green-400 focus:ring-green-400/20"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-white mb-2">Routing Number</label>
+                          <EnhancedInput
+                            placeholder="021000021"
+                            value={formData.businessRoutingNumber}
+                            onChange={(e) => updateFormData("businessRoutingNumber", e.target.value)}
+                            maxLength={9}
+                            className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-green-400 focus:ring-green-400/20"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Security Notice */}
+                <div className="mt-6 p-4 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl border border-emerald-400/30 backdrop-blur-sm">
+                  <div className="flex items-start gap-3">
+                    <div className="p-1 bg-emerald-400/20 rounded-full mt-0.5">
+                      <CheckCircle className="h-4 w-4 text-emerald-300" />
+                    </div>
+                    <div className="text-sm text-emerald-100">
+                      <span className="font-semibold">Bank-level Security:</span> All payment information is encrypted with AES-256 and stored securely. We never store CVV numbers.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <FormField
               label="Payment Terms"
