@@ -42,7 +42,7 @@ export default function WelcomePage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href="/auth">
+              <Link href="/auth?mode=signup">
                 <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-10 py-4 text-lg font-semibold shadow-xl rounded-xl">
                   <Wrench className="h-5 w-5 mr-3" />
                   Get Started
@@ -50,7 +50,7 @@ export default function WelcomePage() {
                 </Button>
               </Link>
 
-              <Link href="/auth">
+              <Link href="/auth?mode=login">
                 <Button
                   variant="outline"
                   className="bg-gradient-to-r from-amber-100 to-orange-100 hover:from-amber-200 hover:to-orange-200 text-slate-700 px-10 py-4 text-lg font-semibold border border-blue-200 rounded-xl"
@@ -230,7 +230,7 @@ export default function WelcomePage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Link href="/auth">
+                <Link href="/auth?mode=signup">
                   <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-10 py-4 text-lg font-semibold shadow-xl rounded-xl">
                     <Wrench className="h-5 w-5 mr-3" />
                     Begin Setup Now

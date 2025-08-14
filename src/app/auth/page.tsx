@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,37 +19,131 @@ import {
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 type AuthMode = "login" | "signup";
 
-export default function AuthPage() {
+function AuthPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { signUp, signIn, socialAuth, isLoading } = useAuth();
   const [mode, setMode] = useState<AuthMode>("login");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
+    phone: "",
+    shopName: ""
+  });
+
+  // Set initial mode based on URL parameter
+  useEffect(() => {
+    const urlMode = searchParams.get('mode');
+    if (urlMode === 'signup' || urlMode === 'login') {
+      setMode(urlMode as AuthMode);
+    }
+  }, [searchParams]);
 
   const handleToggleMode = () => {
     setMode(mode === "login" ? "signup" : "login");
+    // Reset form when switching modes
+    setFormData({
+      email: "",
+      password: "",
+      confirmPassword: "",
+      firstName: "",
+      lastName: "",
+      phone: "",
+      shopName: ""
+    });
   };
 
-  const handleGoogleAuth = () => {
-    // TODO: Implement Google OAuth
-    console.log("Google authentication clicked");
-    router.push("/dashboard");
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleFacebookAuth = () => {
-    // TODO: Implement Facebook OAuth
-    console.log("Facebook authentication clicked");
-    router.push("/dashboard");
+  const handleGoogleAuth = async () => {
+    try {
+      const user = await socialAuth('google');
+      // For new users (sign-up), redirect to shop profile setup
+      // For existing users (sign-in), redirect to dashboard
+      if (user.isNewUser || !user.hasCompletedProfile) {
+        router.push('/shop-profile');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('Google auth failed:', error);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFacebookAuth = async () => {
+    try {
+      const user = await socialAuth('facebook');
+      // For new users (sign-up), redirect to shop profile setup
+      // For existing users (sign-in), redirect to dashboard
+      if (user.isNewUser || !user.hasCompletedProfile) {
+        router.push('/shop-profile');
+      } else {
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      console.error('Facebook auth failed:', error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement form submission logic
-    console.log("Form submitted:", mode);
-    router.push("/dashboard");
+    
+    try {
+      if (mode === "signup") {
+        // Validate required fields for signup
+        if (!formData.email || !formData.password || !formData.firstName || !formData.lastName || !formData.phone || !formData.shopName) {
+          alert('Please fill in all required fields');
+          return;
+        }
+        
+        if (formData.password !== formData.confirmPassword) {
+          alert('Passwords do not match');
+          return;
+        }
+
+        await signUp({
+          email: formData.email,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          shopName: formData.shopName
+        });
+
+        // After successful sign-up, redirect to shop profile setup
+        router.push('/shop-profile');
+      } else {
+        // Login
+        if (!formData.email || !formData.password) {
+          alert('Please enter your email and password');
+          return;
+        }
+
+        const user = await signIn(formData.email);
+        
+        // For existing users, check if they need to complete profile setup
+        if (!user.hasCompletedProfile) {
+          router.push('/shop-profile');
+        } else {
+          router.push('/dashboard');
+        }
+      }
+    } catch (error) {
+      console.error('Authentication failed:', error);
+      alert('Authentication failed. Please try again.');
+    }
   };
 
   return (
@@ -173,6 +267,8 @@ export default function AuthPage() {
                             id="firstName"
                             type="text"
                             placeholder="John"
+                            value={formData.firstName}
+                            onChange={(e) => handleInputChange("firstName", e.target.value)}
                             className="pl-10 h-11 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                             required
                           />
@@ -191,6 +287,8 @@ export default function AuthPage() {
                             id="lastName"
                             type="text"
                             placeholder="Doe"
+                            value={formData.lastName}
+                            onChange={(e) => handleInputChange("lastName", e.target.value)}
                             className="pl-10 h-11 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                             required
                           />
@@ -211,6 +309,8 @@ export default function AuthPage() {
                           id="phone"
                           type="tel"
                           placeholder="+1 (555) 123-4567"
+                          value={formData.phone}
+                          onChange={(e) => handleInputChange("phone", e.target.value)}
                           className="pl-10 h-11 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                           required
                         />
@@ -230,6 +330,8 @@ export default function AuthPage() {
                           id="shopName"
                           type="text"
                           placeholder="John's Auto Service"
+                          value={formData.shopName}
+                          onChange={(e) => handleInputChange("shopName", e.target.value)}
                           className="pl-10 h-11 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                           required
                         />
@@ -251,6 +353,8 @@ export default function AuthPage() {
                       id="email"
                       type="email"
                       placeholder="john@example.com"
+                      value={formData.email}
+                      onChange={(e) => handleInputChange("email", e.target.value)}
                       className="pl-10 h-11 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                       required
                     />
@@ -270,6 +374,8 @@ export default function AuthPage() {
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
+                      value={formData.password}
+                      onChange={(e) => handleInputChange("password", e.target.value)}
                       className="pl-10 pr-10 h-11 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                       required
                     />
@@ -301,6 +407,8 @@ export default function AuthPage() {
                         id="confirmPassword"
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder="••••••••"
+                        value={formData.confirmPassword}
+                        onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                         className="pl-10 pr-10 h-11 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
                         required
                       />
@@ -343,9 +451,10 @@ export default function AuthPage() {
 
                 <Button
                   type="submit"
-                  className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                  disabled={isLoading}
+                  className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {mode === "login" ? "Sign In" : "Create Account"}
+                  {isLoading ? "Please wait..." : mode === "login" ? "Sign In" : "Create Account"}
                 </Button>
               </form>
 
@@ -409,5 +518,20 @@ export default function AuthPage() {
         </div>
       </footer>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-amber-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <AuthPageContent />
+    </Suspense>
   );
 }

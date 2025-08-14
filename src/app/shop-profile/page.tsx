@@ -1,11 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import confetti from 'canvas-confetti';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { ServicePackageBuilder } from '@/components/ServicePackageBuilder';
+import { ServiceMenuPreview } from '@/components/ServiceMenuPreview';
+import { PaymentSetup } from '@/components/PaymentSetup';
+import { BusinessHoursSetup } from '@/components/BusinessHoursSetup';
+import { ServiceMenuData, DEFAULT_BASIC_PACKAGE, DEFAULT_FULL_PACKAGE, DEFAULT_EXTRA_SERVICES } from '@/lib/services';
 import {
   Building2,
   MapPin,
@@ -15,23 +21,22 @@ import {
   ArrowLeft,
   CheckCircle,
   Wrench,
-  Award,
-  DollarSign,
   CreditCard,
   Car,
-  Settings,
+  Eye,
 } from "lucide-react";
 
 export default function ShopProfilePage() {
   const router = useRouter();
+  const { user, isAuthenticated, completeProfile } = useAuth();
   const [activeStep, setActiveStep] = useState(1);
   const [isCompleting, setIsCompleting] = useState(false);
   const [formData, setFormData] = useState({
     // Basic Info
-    shopName: "",
+    shopName: user?.shopName || "",
     description: "",
-    email: "",
-    phone: "",
+    email: user?.email || "",
+    phone: user?.phone || "",
     website: "",
     
     // Location
@@ -53,11 +58,79 @@ export default function ShopProfilePage() {
     commissionRate: "15"
   });
 
+  // Service Menu Data
+  const [serviceMenuData, setServiceMenuData] = useState<ServiceMenuData>({
+    basicPackage: DEFAULT_BASIC_PACKAGE,
+    fullPackage: DEFAULT_FULL_PACKAGE,
+    extraServices: DEFAULT_EXTRA_SERVICES,
+    customServices: []
+  });
+
+  const [showServicePreview, setShowServicePreview] = useState(false);
+
+  // Payment and Business Hours Data
+  const [paymentData, setPaymentData] = useState({
+    abn: "",
+    businessName: "",
+    businessType: "sole-trader",
+    bankAccount: "",
+    paymentMethods: ["bank-transfer"],
+    taxSettings: {
+      gstRegistered: false,
+      gstNumber: "",
+      taxRate: 10
+    }
+  });
+
+  const [businessHoursData, setBusinessHoursData] = useState({
+    schedule: [],
+    timezone: "Australia/Melbourne",
+    lunchBreak: {
+      enabled: false,
+      start: "12:00",
+      end: "13:00"
+    },
+    specialDays: []
+  });
+
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/auth');
+      return;
+    }
+  }, [isAuthenticated, router]);
+
+  // Update form data when user data is available
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        shopName: user.shopName || "",
+        email: user.email || "",
+        phone: user.phone || ""
+      }));
+    }
+  }, [user]);
+
+  // Show loading or redirect if not authenticated
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-amber-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   const steps = [
     { id: 1, title: "Shop Details", icon: Building2 },
     { id: 2, title: "Service Menu", icon: Wrench },
-    { id: 3, title: "Business Setup", icon: Settings },
-    { id: 4, title: "Ready to Launch", icon: CheckCircle },
+    { id: 3, title: "Payment Setup", icon: CreditCard },
+    { id: 4, title: "Business Hours", icon: Clock },
+    { id: 5, title: "Launch It!!", icon: CheckCircle },
   ];
 
   const triggerSuccessConfetti = () => {
@@ -136,9 +209,12 @@ export default function ShopProfilePage() {
     setActiveStep(prev => Math.max(prev - 1, 1));
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     setIsCompleting(true);
     triggerSuccessConfetti();
+    
+    // Mark profile as completed in auth system
+    await completeProfile();
     
     setTimeout(() => {
       router.push('/dashboard');
@@ -253,93 +329,81 @@ export default function ShopProfilePage() {
       case 2:
         return (
           <div className="space-y-6">
-            <div>
-              <h3 className="text-xl font-semibold text-slate-800 mb-4">Service Menu & Pricing</h3>
-              <p className="text-slate-600 mb-6">Define your service offerings and pricing for the marketplace</p>
-            </div>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Basic Service Price *</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm">$</span>
-                    <Input
-                      placeholder="89"
-                      value={formData.basicServicePrice}
-                      onChange={(e) => updateFormData("basicServicePrice", e.target.value)}
-                      className="pl-7"
-                    />
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">Oil change, basic checks</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Full Service Price *</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm">$</span>
-                    <Input
-                      placeholder="159"
-                      value={formData.fullServicePrice}
-                      onChange={(e) => updateFormData("fullServicePrice", e.target.value)}
-                      className="pl-7"
-                    />
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">Comprehensive inspection</p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Tire Rotation *</label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm">$</span>
-                    <Input
-                      placeholder="49"
-                      value={formData.tyreRotationPrice}
-                      onChange={(e) => updateFormData("tyreRotationPrice", e.target.value)}
-                      className="pl-7"
-                    />
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">Tire rotation & balance</p>
-                </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-semibold text-slate-800 mb-2">Service Menu & Pricing</h3>
+                <p className="text-slate-600">Create flexible service packages and define what&apos;s included</p>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Service Bays *</label>
-                  <div className="relative">
-                    <Car className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <select
-                      value={formData.serviceBays}
-                      onChange={(e) => updateFormData("serviceBays", e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                    >
-                      <option value="1">1 Bay</option>
-                      <option value="2">2 Bays</option>
-                      <option value="3">3 Bays</option>
-                      <option value="4">4 Bays</option>
-                      <option value="5">5+ Bays</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Operating Hours *</label>
-                  <div className="relative">
-                    <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <select
-                      value={formData.operatingHours}
-                      onChange={(e) => updateFormData("operatingHours", e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                    >
-                      <option value="7:00 AM - 5:00 PM">7:00 AM - 5:00 PM</option>
-                      <option value="8:00 AM - 5:00 PM">8:00 AM - 5:00 PM</option>
-                      <option value="8:00 AM - 6:00 PM">8:00 AM - 6:00 PM</option>
-                      <option value="9:00 AM - 5:00 PM">9:00 AM - 5:00 PM</option>
-                    </select>
-                  </div>
-                </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowServicePreview(!showServicePreview)}
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  {showServicePreview ? 'Hide' : 'Preview'}
+                </Button>
               </div>
             </div>
+
+            {showServicePreview ? (
+              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <ServiceMenuPreview 
+                  serviceMenuData={serviceMenuData} 
+                  shopName={formData.shopName || "Your Auto Shop"}
+                />
+              </div>
+            ) : (
+              <>
+                <ServicePackageBuilder
+                  initialData={serviceMenuData}
+                  onDataChange={setServiceMenuData}
+                />
+
+                {/* Shop Configuration */}
+                <Card className="bg-gradient-to-r from-slate-50 to-slate-100 border border-slate-200">
+                  <CardContent className="p-6">
+                    <h4 className="text-lg font-semibold text-slate-800 mb-4">Shop Configuration</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Service Bays *</label>
+                        <div className="relative">
+                          <Car className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <select
+                            value={formData.serviceBays}
+                            onChange={(e) => updateFormData("serviceBays", e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          >
+                            <option value="1">1 Bay</option>
+                            <option value="2">2 Bays</option>
+                            <option value="3">3 Bays</option>
+                            <option value="4">4 Bays</option>
+                            <option value="5">5+ Bays</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-2">Operating Hours *</label>
+                        <div className="relative">
+                          <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <select
+                            value={formData.operatingHours}
+                            onChange={(e) => updateFormData("operatingHours", e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                          >
+                            <option value="7:00 AM - 5:00 PM">7:00 AM - 5:00 PM</option>
+                            <option value="8:00 AM - 5:00 PM">8:00 AM - 5:00 PM</option>
+                            <option value="8:00 AM - 6:00 PM">8:00 AM - 6:00 PM</option>
+                            <option value="9:00 AM - 5:00 PM">9:00 AM - 5:00 PM</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
           </div>
         );
 
@@ -347,55 +411,33 @@ export default function ShopProfilePage() {
         return (
           <div className="space-y-6">
             <div>
-              <h3 className="text-xl font-semibold text-slate-800 mb-4">Business Setup</h3>
-              <p className="text-slate-600 mb-6">Payment and business information for the marketplace</p>
+              <h3 className="text-xl font-semibold text-slate-800 mb-2">Payment Setup</h3>
+              <p className="text-slate-600">Configure payment methods and business information</p>
             </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Australian Business Number (ABN) *</label>
-                <div className="relative">
-                  <Award className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <Input
-                    placeholder="12 345 678 901"
-                    value={formData.abn}
-                    onChange={(e) => updateFormData("abn", e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Bank Account (BSB + Account) *</label>
-                <div className="relative">
-                  <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <Input
-                    placeholder="083-004 12345678"
-                    value={formData.bankAccount}
-                    onChange={(e) => updateFormData("bankAccount", e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <p className="text-xs text-slate-500 mt-1">For receiving payments from completed services</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Commission Rate</label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                  <Input
-                    value="15% (Standard marketplace rate)"
-                    disabled
-                    className="pl-10 bg-slate-50 text-slate-600"
-                  />
-                </div>
-                <p className="text-xs text-slate-500 mt-1">Platform fee deducted from each completed booking</p>
-              </div>
-            </div>
+            
+            <PaymentSetup
+              initialData={paymentData}
+              onDataChange={(data) => setPaymentData(data as typeof paymentData)}
+            />
           </div>
         );
 
       case 4:
+        return (
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-xl font-semibold text-slate-800 mb-2">Business Hours</h3>
+              <p className="text-slate-600">Set your operating hours and availability</p>
+            </div>
+            
+            <BusinessHoursSetup
+              initialData={businessHoursData}
+              onDataChange={(data) => setBusinessHoursData(data as typeof businessHoursData)}
+            />
+          </div>
+        );
+
+      case 5:
         return (
           <div className="space-y-6 text-center">
             <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl mx-auto mb-6 flex items-center justify-center shadow-lg">

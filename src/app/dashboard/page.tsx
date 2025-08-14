@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -68,8 +69,40 @@ const quickStats = [
 
 export default function DashboardSPA() {
   const router = useRouter();
+  const { user, isAuthenticated, signOut } = useAuth();
   const [currentPage, setCurrentPage] = useState("overview");
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  // Redirect to auth if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/auth');
+      return;
+    }
+    
+    // Redirect to shop profile if profile not completed
+    if (user && (!user.hasCompletedProfile || user.isNewUser)) {
+      router.push('/shop-profile');
+      return;
+    }
+  }, [isAuthenticated, user, router]);
+
+  // Show loading if not authenticated or user data not available
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-amber-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleSignOut = () => {
+    signOut();
+    router.push('/');
+  };
 
   const renderMainContent = () => {
     switch (currentPage) {
@@ -569,10 +602,37 @@ export default function DashboardSPA() {
         {isCollapsed && (
           <div className="p-4 border-t border-blue-200/50">
             <div className="flex justify-center">
-              <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center shadow-lg cursor-pointer hover:from-slate-700 hover:to-slate-800 transition-all duration-200 hover:scale-105">
-                <span className="text-white font-bold text-sm">N</span>
+              <div 
+                className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center shadow-lg cursor-pointer hover:from-slate-700 hover:to-slate-800 transition-all duration-200 hover:scale-105"
+                onClick={handleSignOut}
+                title="Sign Out"
+              >
+                <span className="text-white font-bold text-sm">{user?.firstName?.[0] || 'U'}</span>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Footer for expanded state */}
+        {!isCollapsed && (
+          <div className="p-4 border-t border-blue-200/50">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-sm">{user?.firstName?.[0] || 'U'}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-800 truncate">{user?.firstName} {user?.lastName}</p>
+                <p className="text-xs text-slate-600 truncate">{user?.shopName}</p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSignOut}
+              className="w-full text-slate-600 border-slate-200 hover:bg-slate-50"
+            >
+              Sign Out
+            </Button>
           </div>
         )}
       </div>
