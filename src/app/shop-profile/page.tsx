@@ -1,24 +1,20 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
+import { useRouter } from 'next/navigation';
+import confetti from 'canvas-confetti';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { FormField, FormSection, FormGrid } from "@/components/ui/form-field";
-import { EnhancedInput } from "@/components/ui/enhanced-input";
-import { EnhancedTextarea } from "@/components/ui/enhanced-textarea";
-import { PricingCard, AddServiceCard } from "@/components/ui/pricing-card";
+import { Input } from "@/components/ui/input";
 import {
   Building2,
   MapPin,
   Phone,
   Mail,
   Clock,
-  Globe,
-  Save,
   ArrowLeft,
   CheckCircle,
   Wrench,
-  Users,
   Award,
   DollarSign,
   CreditCard,
@@ -26,1073 +22,420 @@ import {
   Settings,
 } from "lucide-react";
 
-type BusinessHours = { open: string; close: string; closed: boolean };
-
 export default function ShopProfilePage() {
+  const router = useRouter();
   const [activeStep, setActiveStep] = useState(1);
-  const formTopRef = useRef<HTMLDivElement | null>(null);
+  const [isCompleting, setIsCompleting] = useState(false);
   const [formData, setFormData] = useState({
-    // Basic Information
+    // Basic Info
     shopName: "",
     description: "",
     email: "",
     phone: "",
     website: "",
-
+    
     // Location
     address: "",
     city: "",
     state: "",
     zipCode: "",
-
-    // Business Hours
-    monday: { open: "08:00", close: "18:00", closed: false },
-    tuesday: { open: "08:00", close: "18:00", closed: false },
-    wednesday: { open: "08:00", close: "18:00", closed: false },
-    thursday: { open: "08:00", close: "18:00", closed: false },
-    friday: { open: "08:00", close: "18:00", closed: false },
-    saturday: { open: "09:00", close: "17:00", closed: false },
-    sunday: { open: "10:00", close: "16:00", closed: true },
-
-    // Services
-    services: ["Oil Change", "Brake Service", "Tire Rotation"],
-    customServices: [] as string[],
-    specialties: "",
-
-    // Pricing
-    servicePricing: [
-      {
-        id: "1",
-        name: "Oil Change",
-        basePrice: 49.99,
-        duration: 45,
-        category: "Maintenance",
-        description: "Full synthetic oil change with 21-point inspection",
-      },
-      {
-        id: "2",
-        name: "Brake Inspection",
-        basePrice: 0,
-        duration: 30,
-        category: "Inspection",
-        description: "Complete brake system inspection",
-        isPopular: false,
-      },
-    ],
-    laborRate: 125,
-
-    // Capacity & Equipment
-    totalBays: 4,
-    lifts: 3,
-    maxVehiclesPerDay: 20,
-    equipmentList: [
-      "Alignment Machine",
-      "Tire Changer",
-      "Brake Lathe",
-      "AC Recovery System",
-    ],
-
-    // Payment Methods
-    acceptedPayments: ["Cash", "Credit Card", "Debit Card"],
-    creditCards: ["Visa", "Mastercard", "American Express"],
-    paymentTerms: "Payment due upon completion",
-
-    // Business Payment Details (where shop receives money)
-    businessPaymentMethod: "card", // "card" or "bank"
-    businessCardNumber: "",
-    businessCardHolderName: "",
-    businessCardExpiry: "",
-    businessCardCvv: "",
-    businessBankName: "",
-    businessAccountNumber: "",
-    businessRoutingNumber: "",
-    businessAccountHolderName: "",
-
-    // Team
-    teamSize: "",
-    certifications: [] as string[],
-    yearsInBusiness: "",
+    
+    // Service Setup
+    basicServicePrice: "",
+    fullServicePrice: "",
+    tyreRotationPrice: "",
+    serviceBays: "2",
+    operatingHours: "8:00 AM - 6:00 PM",
+    
+    // Payment Info
+    abn: "",
+    bankAccount: "",
+    commissionRate: "15"
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
   const steps = [
-    { id: 1, title: "Basic", short: "Info", icon: Building2 },
-    { id: 2, title: "Location", short: "Loc", icon: MapPin },
-    { id: 3, title: "Hours", short: "Hrs", icon: Clock },
-    { id: 4, title: "Services", short: "Svc", icon: Wrench },
-    { id: 5, title: "Pricing", short: "Price", icon: DollarSign },
-    { id: 6, title: "Capacity", short: "Cap", icon: Car },
-    { id: 7, title: "Payment", short: "Pay", icon: CreditCard },
-    { id: 8, title: "Team", short: "Team", icon: Users },
+    { id: 1, title: "Shop Details", icon: Building2 },
+    { id: 2, title: "Service Menu", icon: Wrench },
+    { id: 3, title: "Business Setup", icon: Settings },
+    { id: 4, title: "Ready to Launch", icon: CheckCircle },
   ];
 
-  const validateStep = (step: number): boolean => {
-    const newErrors: Record<string, string> = {};
+  const triggerSuccessConfetti = () => {
+    // Initial big burst
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#3B82F6', '#F59E0B', '#60A5FA', '#64748B', '#10B981']
+    });
 
-    switch (step) {
-      case 1:
-        if (!formData.shopName) newErrors.shopName = "Shop name is required";
-        if (!formData.email) newErrors.email = "Email is required";
-        if (!formData.phone) newErrors.phone = "Phone number is required";
-        break;
-      case 2:
-        if (!formData.address) newErrors.address = "Address is required";
-        if (!formData.city) newErrors.city = "City is required";
-        if (!formData.state) newErrors.state = "State is required";
-        if (!formData.zipCode) newErrors.zipCode = "ZIP code is required";
-        break;
+    // Multiple confetti bursts
+    const duration = 4000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { 
+      startVelocity: 25,
+      spread: 360, 
+      ticks: 100,
+      zIndex: 1000 
+    };
+
+    function randomInRange(min: number, max: number) {
+      return Math.random() * (max - min) + min;
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const interval: NodeJS.Timeout = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 30 * (timeLeft / duration);
+      
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: randomInRange(0.1, 0.3) },
+        colors: ['#3B82F6', '#F59E0B', '#60A5FA', '#64748B', '#10B981']
+      });
+      
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: randomInRange(0.1, 0.3) },
+        colors: ['#3B82F6', '#F59E0B', '#60A5FA', '#64748B', '#10B981']
+      });
+      
+      if (Math.floor(timeLeft / 1000) !== Math.floor((timeLeft - 500) / 1000)) {
+        confetti({
+          particleCount: 50,
+          spread: 60,
+          origin: { x: 0.5, y: 0.5 },
+          colors: ['#3B82F6', '#F59E0B', '#60A5FA', '#64748B', '#10B981']
+        });
+      }
+    }, 500);
+
+    setTimeout(() => {
+      confetti({
+        particleCount: 80,
+        spread: 100,
+        origin: { x: 0.5, y: 0.4 },
+        colors: ['#3B82F6', '#F59E0B', '#60A5FA', '#64748B', '#10B981']
+      });
+    }, 3500);
   };
 
   const handleNext = () => {
-    if (validateStep(activeStep)) {
-      setActiveStep((prev) => Math.min(prev + 1, steps.length));
+    if (activeStep < steps.length) {
+      setActiveStep(prev => prev + 1);
     }
   };
 
   const handlePrevious = () => {
-    setActiveStep((prev) => Math.max(prev - 1, 1));
+    setActiveStep(prev => Math.max(prev - 1, 1));
   };
 
-  const handleSave = () => {
-    if (validateStep(activeStep)) {
-      // Save logic here
-      console.log("Saving profile...", formData);
-    }
+  const handleComplete = () => {
+    setIsCompleting(true);
+    triggerSuccessConfetti();
+    
+    setTimeout(() => {
+      router.push('/dashboard');
+    }, 5000);
   };
 
-  const handleGoToStep = (stepId: number) => {
-    setActiveStep(Math.max(1, Math.min(stepId, steps.length)));
-  };
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") {
-        handleNext();
-      } else if (e.key === "ArrowLeft") {
-        handlePrevious();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeStep]);
-
-  useEffect(() => {
-    if (formTopRef.current) {
-      formTopRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [activeStep]);
-
-  const updateFormData = <K extends keyof typeof formData>(
-    field: K,
-    value: (typeof formData)[K]
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }));
-    }
+  const updateFormData = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const renderStepContent = () => {
     switch (activeStep) {
       case 1:
         return (
-          <FormSection
-            title="Basic Information"
-            description="Tell us about your automotive service shop"
-          >
-            <FormGrid columns={1}>
-              <FormField label="Shop Name" required error={errors.shopName}>
-                <EnhancedInput
-                  icon={<Building2 className="h-4 w-4" />}
-                  placeholder="AutoServe Pro Shop"
-                  value={formData.shopName}
-                  onChange={(e) => updateFormData("shopName", e.target.value)}
-                  error={!!errors.shopName}
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-xl font-semibold text-slate-800 mb-4">Shop Details</h3>
+              <p className="text-slate-600 mb-6">Basic information about your automotive service business</p>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Shop Name *</label>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="Melbourne Auto Care"
+                    value={formData.shopName}
+                    onChange={(e) => updateFormData("shopName", e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Business Description</label>
+                <textarea
+                  placeholder="Professional automotive service specializing in general maintenance, brake repairs, and tire services..."
+                  value={formData.description}
+                  onChange={(e) => updateFormData("description", e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  rows={3}
                 />
-              </FormField>
-            </FormGrid>
+              </div>
 
-            <FormField
-              label="Description"
-              description="Brief description of your services and expertise"
-            >
-              <EnhancedTextarea
-                placeholder="We provide professional automotive services with over 20 years of experience..."
-                value={formData.description}
-                onChange={(e) => updateFormData("description", e.target.value)}
-                maxLength={500}
-                showCount
-                rows={4}
-              />
-            </FormField>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Business Email *</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                      type="email"
+                      placeholder="contact@melbourneautocare.com.au"
+                      value={formData.email}
+                      onChange={(e) => updateFormData("email", e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
 
-            <FormGrid>
-              <FormField label="Email Address" required error={errors.email}>
-                <EnhancedInput
-                  icon={<Mail className="h-4 w-4" />}
-                  type="email"
-                  placeholder="shop@autoserve.com"
-                  value={formData.email}
-                  onChange={(e) => updateFormData("email", e.target.value)}
-                  error={!!errors.email}
-                />
-              </FormField>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Contact Number *</label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                      placeholder="(03) 9XXX XXXX"
+                      value={formData.phone}
+                      onChange={(e) => updateFormData("phone", e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+              </div>
 
-              <FormField label="Phone Number" required error={errors.phone}>
-                <EnhancedInput
-                  icon={<Phone className="h-4 w-4" />}
-                  placeholder="(555) 123-4567"
-                  value={formData.phone}
-                  onChange={(e) => updateFormData("phone", e.target.value)}
-                  error={!!errors.phone}
-                />
-              </FormField>
-            </FormGrid>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Street Address *</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                      placeholder="123 Collins Street"
+                      value={formData.address}
+                      onChange={(e) => updateFormData("address", e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
 
-            <FormField
-              label="Website"
-              description="Optional - your shop's website URL"
-            >
-              <EnhancedInput
-                icon={<Globe className="h-4 w-4" />}
-                placeholder="https://autoservepro.com"
-                value={formData.website}
-                onChange={(e) => updateFormData("website", e.target.value)}
-              />
-            </FormField>
-          </FormSection>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Suburb *</label>
+                    <Input
+                      placeholder="Melbourne"
+                      value={formData.city}
+                      onChange={(e) => updateFormData("city", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Postcode *</label>
+                    <Input
+                      placeholder="3000"
+                      value={formData.zipCode}
+                      onChange={(e) => updateFormData("zipCode", e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         );
 
       case 2:
         return (
-          <FormSection
-            title="Shop Location"
-            description="Where can customers find your shop?"
-          >
-            <FormField label="Street Address" required error={errors.address}>
-              <EnhancedInput
-                icon={<MapPin className="h-4 w-4" />}
-                placeholder="123 Main Street"
-                value={formData.address}
-                onChange={(e) => updateFormData("address", e.target.value)}
-                error={!!errors.address}
-              />
-            </FormField>
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-xl font-semibold text-slate-800 mb-4">Service Menu & Pricing</h3>
+              <p className="text-slate-600 mb-6">Define your service offerings and pricing for the marketplace</p>
+            </div>
 
-            <FormGrid columns={3}>
-              <FormField label="City" required error={errors.city}>
-                <EnhancedInput
-                  placeholder="San Francisco"
-                  value={formData.city}
-                  onChange={(e) => updateFormData("city", e.target.value)}
-                  error={!!errors.city}
-                />
-              </FormField>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Basic Service Price *</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm">$</span>
+                    <Input
+                      placeholder="89"
+                      value={formData.basicServicePrice}
+                      onChange={(e) => updateFormData("basicServicePrice", e.target.value)}
+                      className="pl-7"
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">Oil change, basic checks</p>
+                </div>
 
-              <FormField label="State" required error={errors.state}>
-                <EnhancedInput
-                  placeholder="CA"
-                  value={formData.state}
-                  onChange={(e) => updateFormData("state", e.target.value)}
-                  error={!!errors.state}
-                />
-              </FormField>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Full Service Price *</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm">$</span>
+                    <Input
+                      placeholder="159"
+                      value={formData.fullServicePrice}
+                      onChange={(e) => updateFormData("fullServicePrice", e.target.value)}
+                      className="pl-7"
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">Comprehensive inspection</p>
+                </div>
 
-              <FormField label="ZIP Code" required error={errors.zipCode}>
-                <EnhancedInput
-                  placeholder="94105"
-                  value={formData.zipCode}
-                  onChange={(e) => updateFormData("zipCode", e.target.value)}
-                  error={!!errors.zipCode}
-                />
-              </FormField>
-            </FormGrid>
-          </FormSection>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Tire Rotation *</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-sm">$</span>
+                    <Input
+                      placeholder="49"
+                      value={formData.tyreRotationPrice}
+                      onChange={(e) => updateFormData("tyreRotationPrice", e.target.value)}
+                      className="pl-7"
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1">Tire rotation & balance</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Service Bays *</label>
+                  <div className="relative">
+                    <Car className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <select
+                      value={formData.serviceBays}
+                      onChange={(e) => updateFormData("serviceBays", e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    >
+                      <option value="1">1 Bay</option>
+                      <option value="2">2 Bays</option>
+                      <option value="3">3 Bays</option>
+                      <option value="4">4 Bays</option>
+                      <option value="5">5+ Bays</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Operating Hours *</label>
+                  <div className="relative">
+                    <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <select
+                      value={formData.operatingHours}
+                      onChange={(e) => updateFormData("operatingHours", e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    >
+                      <option value="7:00 AM - 5:00 PM">7:00 AM - 5:00 PM</option>
+                      <option value="8:00 AM - 5:00 PM">8:00 AM - 5:00 PM</option>
+                      <option value="8:00 AM - 6:00 PM">8:00 AM - 6:00 PM</option>
+                      <option value="9:00 AM - 5:00 PM">9:00 AM - 5:00 PM</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         );
 
       case 3:
         return (
-          <FormSection
-            title="Business Hours"
-            description="When are you open for business?"
-          >
-            <div className="space-y-4">
-              {Object.entries(formData)
-                .filter(([key]) =>
-                  [
-                    "monday",
-                    "tuesday",
-                    "wednesday",
-                    "thursday",
-                    "friday",
-                    "saturday",
-                    "sunday",
-                  ].includes(key)
-                )
-                .map(([day, hours]) => {
-                  const h = hours as BusinessHours;
-                  return (
-                    <div
-                      key={day}
-                      className="flex items-center gap-4 p-4 bg-white rounded-lg border border-slate-200 shadow-sm"
-                    >
-                      <div className="w-20 font-medium text-slate-700 capitalize">
-                        {day}
-                      </div>
-
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={h.closed}
-                          onChange={(e) =>
-                            updateFormData(
-                              day as keyof typeof formData,
-                              {
-                                ...h,
-                                closed: e.target.checked,
-                              } as BusinessHours
-                            )
-                          }
-                          className="rounded border-blue-300 text-blue-500 focus:ring-blue-500/20"
-                        />
-                        <span className="text-sm text-slate-600">Closed</span>
-                      </label>
-
-                      {!h.closed && (
-                        <div className="flex items-center gap-2 flex-1">
-                          <EnhancedInput
-                            type="time"
-                            value={h.open}
-                            onChange={(e) =>
-                              updateFormData(
-                                day as keyof typeof formData,
-                                {
-                                  ...h,
-                                  open: e.target.value,
-                                } as BusinessHours
-                              )
-                            }
-                            className="w-32"
-                          />
-                          <span className="text-slate-500">to</span>
-                          <EnhancedInput
-                            type="time"
-                            value={h.close}
-                            onChange={(e) =>
-                              updateFormData(
-                                day as keyof typeof formData,
-                                {
-                                  ...h,
-                                  close: e.target.value,
-                                } as BusinessHours
-                              )
-                            }
-                            className="w-32"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-xl font-semibold text-slate-800 mb-4">Business Setup</h3>
+              <p className="text-slate-600 mb-6">Payment and business information for the marketplace</p>
             </div>
-          </FormSection>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Australian Business Number (ABN) *</label>
+                <div className="relative">
+                  <Award className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="12 345 678 901"
+                    value={formData.abn}
+                    onChange={(e) => updateFormData("abn", e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Bank Account (BSB + Account) *</label>
+                <div className="relative">
+                  <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="083-004 12345678"
+                    value={formData.bankAccount}
+                    onChange={(e) => updateFormData("bankAccount", e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <p className="text-xs text-slate-500 mt-1">For receiving payments from completed services</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Commission Rate</label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    value="15% (Standard marketplace rate)"
+                    disabled
+                    className="pl-10 bg-slate-50 text-slate-600"
+                  />
+                </div>
+                <p className="text-xs text-slate-500 mt-1">Platform fee deducted from each completed booking</p>
+              </div>
+            </div>
+          </div>
         );
 
       case 4:
         return (
-          <FormSection
-            title="Services & Specialties"
-            description="What automotive services do you offer?"
-          >
-            {/* Service Types */}
-            <div className="mb-6">
-              <h3 className="text-lg font-medium text-slate-800 mb-3">Service Types</h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="p-4 border border-blue-200 rounded-lg bg-blue-50/30">
-                  <h4 className="font-medium text-slate-800 mb-2">Basic Service</h4>
-                  <p className="text-sm text-slate-600">Oil change, fluid check, battery test, visual inspection</p>
-                </div>
-                <div className="p-4 border border-orange-200 rounded-lg bg-orange-50/30">
-                  <h4 className="font-medium text-slate-800 mb-2">Full Service</h4>
-                  <p className="text-sm text-slate-600">Basic service + 21-point inspection, tire rotation, brake check</p>
-                </div>
-              </div>
+          <div className="space-y-6 text-center">
+            <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl mx-auto mb-6 flex items-center justify-center shadow-lg">
+              <CheckCircle className="h-12 w-12 text-white" />
             </div>
-
-            {/* Main Services */}
-            <FormField
-              label="Services Offered"
-              description="Select the services your shop provides"
-            >
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {[
-                  "Oil Change",
-                  "Brake Service", 
-                  "Tire Rotation",
-                  "Engine Diagnostic",
-                  "Transmission Service",
-                  "A/C Repair",
-                  "Battery Replacement",
-                  "Tune-up",
-                  "Alignment",
-                  "Inspection",
-                  "Detailing",
-                  "Towing",
-                ].map((service) => (
-                  <label
-                    key={service}
-                    className="flex items-center gap-2 p-3 rounded-lg border border-slate-200 hover:bg-blue-50 cursor-pointer transition-all"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.services.includes(service)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          updateFormData("services", [
-                            ...formData.services,
-                            service,
-                          ]);
-                        } else {
-                          updateFormData(
-                            "services",
-                            formData.services.filter((s) => s !== service)
-                          );
-                        }
-                      }}
-                      className="rounded border-blue-300 text-blue-500 focus:ring-blue-500/20"
-                    />
-                    <span className="text-sm text-slate-700">{service}</span>
-                  </label>
-                ))}
-              </div>
-            </FormField>
-
-            {/* Custom Services */}
-            <FormField
-              label="Additional Services"
-              description="Add any other services you offer"
-            >
-              <div className="space-y-2">
-                {formData.customServices && formData.customServices.map((service, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <EnhancedInput
-                      placeholder="Service name"
-                      value={service}
-                      onChange={(e) => {
-                        const updated = [...(formData.customServices || [])];
-                        updated[index] = e.target.value;
-                        updateFormData("customServices", updated);
-                      }}
-                      className="flex-1"
-                    />
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const updated = (formData.customServices || []).filter((_, i) => i !== index);
-                        updateFormData("customServices", updated);
-                      }}
-                      className="text-slate-600"
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    const current = formData.customServices || [];
-                    updateFormData("customServices", [...current, ""]);
-                  }}
-                  className="text-blue-600 border-blue-300"
-                >
-                  + Add Service
-                </Button>
-              </div>
-            </FormField>
-
-            <FormField
-              label="Specialties & Equipment"
-              description="Describe any specialized services or equipment"
-            >
-              <EnhancedTextarea
-                placeholder="We specialize in European vehicles and have state-of-the-art diagnostic equipment..."
-                value={formData.specialties}
-                onChange={(e) => updateFormData("specialties", e.target.value)}
-                maxLength={300}
-                showCount
-                rows={3}
-              />
-            </FormField>
-          </FormSection>
-        );
-
-      case 5:
-        return (
-          <FormSection
-            title="Service Pricing"
-            description="Set pricing for your services and labor rates"
-          >
-            <FormField
-              label="Hourly Labor Rate"
-              description="Standard hourly rate for labor"
-            >
-              <EnhancedInput
-                icon={<DollarSign className="h-4 w-4" />}
-                type="number"
-                step="0.01"
-                placeholder="125.00"
-                value={formData.laborRate}
-                onChange={(e) =>
-                  updateFormData("laborRate", parseFloat(e.target.value) || 0)
-                }
-                suffix={<span className="text-slate-500">/hour</span>}
-              />
-            </FormField>
-
+            
             <div>
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="font-medium text-slate-700">Service Pricing</h4>
-                <span className="text-xs text-slate-500">
-                  {formData.servicePricing.length} services
-                </span>
-              </div>
-              <div className="space-y-3">
-                {formData.servicePricing.slice(0, 3).map((service) => (
-                  <PricingCard
-                    key={service.id}
-                    service={service}
-                    editable
-                    className="w-full"
-                    onEdit={(updatedService) => {
-                      const updated = formData.servicePricing.map((s) =>
-                        s.id === updatedService.id
-                          ? (updatedService as (typeof formData.servicePricing)[number])
-                          : s
-                      ) as typeof formData.servicePricing;
-                      updateFormData("servicePricing", updated);
-                    }}
-                    onDelete={(id) => {
-                      const updated = formData.servicePricing.filter(
-                        (s) => s.id !== id
-                      ) as typeof formData.servicePricing;
-                      updateFormData("servicePricing", updated);
-                    }}
-                  />
-                ))}
-                {formData.servicePricing.length > 3 && (
-                  <div className="text-center py-3 text-sm text-slate-500 bg-slate-50 rounded-lg">
-                    +{formData.servicePricing.length - 3} more services
-                  </div>
-                )}
-                <AddServiceCard
-                  onAdd={(newService) => {
-                    const serviceWithId = {
-                      ...newService,
-                      description:
-                        (newService as { description?: string }).description ??
-                        "",
-                      id: Date.now().toString(),
-                    } as (typeof formData.servicePricing)[number];
-                    const next = [
-                      ...formData.servicePricing,
-                      serviceWithId,
-                    ] as typeof formData.servicePricing;
-                    updateFormData("servicePricing", next);
-                  }}
-                  className="w-full"
-                />
-              </div>
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent mb-4">
+                Ready to Launch Your Shop!
+              </h3>
+              <p className="text-slate-600 mb-8">
+                Your mechanic shop is configured and ready to start accepting bookings through the marketplace platform.
+              </p>
             </div>
-          </FormSection>
-        );
 
-      case 6:
-        return (
-          <FormSection
-            title="Shop Capacity & Equipment"
-            description="Tell us about your facility and equipment"
-          >
-            <FormGrid columns={3}>
-              <FormField
-                label="Service Bays"
-                description="Total number of service bays"
-              >
-                <EnhancedInput
-                  icon={<Car className="h-4 w-4" />}
-                  type="number"
-                  placeholder="4"
-                  value={formData.totalBays}
-                  onChange={(e) =>
-                    updateFormData("totalBays", parseInt(e.target.value) || 0)
-                  }
-                />
-              </FormField>
-
-              <FormField
-                label="Vehicle Lifts"
-                description="Number of hydraulic lifts"
-              >
-                <EnhancedInput
-                  icon={<Settings className="h-4 w-4" />}
-                  type="number"
-                  placeholder="3"
-                  value={formData.lifts}
-                  onChange={(e) =>
-                    updateFormData("lifts", parseInt(e.target.value) || 0)
-                  }
-                />
-              </FormField>
-
-              <FormField
-                label="Daily Capacity"
-                description="Max vehicles per day"
-              >
-                <EnhancedInput
-                  icon={<Car className="h-4 w-4" />}
-                  type="number"
-                  placeholder="20"
-                  value={formData.maxVehiclesPerDay}
-                  onChange={(e) =>
-                    updateFormData(
-                      "maxVehiclesPerDay",
-                      parseInt(e.target.value) || 0
-                    )
-                  }
-                />
-              </FormField>
-            </FormGrid>
-
-            <FormField
-              label="Equipment & Tools"
-              description="Select your available equipment"
-            >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {[
-                  "Alignment Machine",
-                  "Tire Changer",
-                  "Brake Lathe",
-                  "AC Recovery System",
-                  "Diagnostic Scanner",
-                  "Transmission Jack",
-                  "Engine Hoist",
-                  "Air Compressor",
-                  "Wheel Balancer",
-                  "Paint Booth",
-                  "Welder",
-                  "Parts Washer",
-                ].map((equipment) => (
-                  <label
-                    key={equipment}
-                    className="flex items-center gap-2 p-2 rounded border border-blue-200/30 hover:bg-blue-50/30 cursor-pointer transition-all text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.equipmentList.includes(equipment)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          updateFormData("equipmentList", [
-                            ...formData.equipmentList,
-                            equipment,
-                          ]);
-                        } else {
-                          updateFormData(
-                            "equipmentList",
-                            formData.equipmentList.filter(
-                              (eq) => eq !== equipment
-                            )
-                          );
-                        }
-                      }}
-                      className="rounded border-blue-300 text-blue-500 focus:ring-blue-500/20"
-                    />
-                    <span className="text-slate-700">{equipment}</span>
-                  </label>
-                ))}
+            <div className="grid grid-cols-2 gap-4 max-w-lg mx-auto text-sm">
+              <div className="flex items-center gap-2 text-slate-600">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Shop Profile Complete</span>
               </div>
-            </FormField>
-          </FormSection>
-        );
-
-      case 7:
-        return (
-          <FormSection
-            title="Payment Methods & Terms"
-            description="Configure payment options for your customers"
-          >
-            <FormField label="Accepted Payment Methods">
-              <div className="grid grid-cols-2 gap-2">
-                {[
-                  "Cash",
-                  "Credit Card",
-                  "Debit Card",
-                  "Check",
-                  "Mobile Payment",
-                  "Bank Transfer",
-                  "Buy Now Pay Later",
-                  "Fleet Account",
-                ].map((method) => (
-                  <label
-                    key={method}
-                    className="flex items-center gap-2 p-2 rounded border border-blue-200/30 hover:bg-blue-50/30 cursor-pointer transition-all text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.acceptedPayments.includes(method)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          updateFormData("acceptedPayments", [
-                            ...formData.acceptedPayments,
-                            method,
-                          ]);
-                        } else {
-                          updateFormData(
-                            "acceptedPayments",
-                            formData.acceptedPayments.filter(
-                              (p) => p !== method
-                            )
-                          );
-                        }
-                      }}
-                      className="rounded border-blue-300 text-blue-500 focus:ring-blue-500/20"
-                    />
-                    <span className="text-slate-700">{method}</span>
-                  </label>
-                ))}
+              <div className="flex items-center gap-2 text-slate-600">
+                <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                <span>Service Menu Configured</span>
               </div>
-            </FormField>
-
-            {formData.acceptedPayments.includes("Credit Card") && (
-              <FormField label="Credit Card Brands">
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    "Visa",
-                    "Mastercard",
-                    "American Express",
-                    "Discover",
-                    "Diners Club",
-                    "JCB",
-                    "UnionPay",
-                  ].map((card) => (
-                    <label
-                      key={card}
-                      className="flex items-center gap-2 p-2 rounded border border-blue-200/30 hover:bg-blue-50/30 cursor-pointer transition-all text-sm"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={formData.creditCards.includes(card)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            updateFormData("creditCards", [
-                              ...formData.creditCards,
-                              card,
-                            ]);
-                          } else {
-                            updateFormData(
-                              "creditCards",
-                              formData.creditCards.filter((c) => c !== card)
-                            );
-                          }
-                        }}
-                        className="rounded border-blue-300 text-blue-500 focus:ring-blue-500/20"
-                      />
-                      <span className="text-slate-700">{card}</span>
-                    </label>
-                  ))}
-                </div>
-              </FormField>
-            )}
-
-            {/* Business Payment Details */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-8 rounded-2xl shadow-xl mt-8">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
-              <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
-                    <CreditCard className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white">Payment Destination</h3>
-                    <p className="text-blue-100 text-sm">Where your earnings will be deposited</p>
-                  </div>
-                </div>
-
-                {/* Method Selection */}
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <label
-                    className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                      formData.businessPaymentMethod === "card"
-                        ? "border-white bg-white/20 shadow-lg"
-                        : "border-white/30 hover:border-white/50 hover:bg-white/10"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="businessPaymentMethod"
-                      value="card"
-                      checked={formData.businessPaymentMethod === "card"}
-                      onChange={(e) => updateFormData("businessPaymentMethod", e.target.value)}
-                      className="sr-only"
-                    />
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-gradient-to-br from-orange-400 to-orange-500 rounded-lg">
-                        <CreditCard className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-white">Business Card</div>
-                        <div className="text-xs text-blue-100">Credit or debit card</div>
-                      </div>
-                    </div>
-                    {formData.businessPaymentMethod === "card" && (
-                      <div className="absolute top-3 right-3 w-3 h-3 bg-orange-400 rounded-full"></div>
-                    )}
-                  </label>
-
-                  <label
-                    className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                      formData.businessPaymentMethod === "bank"
-                        ? "border-white bg-white/20 shadow-lg"
-                        : "border-white/30 hover:border-white/50 hover:bg-white/10"
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="businessPaymentMethod"
-                      value="bank"
-                      checked={formData.businessPaymentMethod === "bank"}
-                      onChange={(e) => updateFormData("businessPaymentMethod", e.target.value)}
-                      className="sr-only"
-                    />
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-gradient-to-br from-green-400 to-green-500 rounded-lg">
-                        <Building2 className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-white">Bank Account</div>
-                        <div className="text-xs text-blue-100">Direct deposit</div>
-                      </div>
-                    </div>
-                    {formData.businessPaymentMethod === "bank" && (
-                      <div className="absolute top-3 right-3 w-3 h-3 bg-green-400 rounded-full"></div>
-                    )}
-                  </label>
-                </div>
-
-                {/* Card Form */}
-                {formData.businessPaymentMethod === "card" && (
-                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-                    <div className="space-y-5">
-                      <div className="relative">
-                        <label className="block text-sm font-medium text-white mb-2">Card Holder Name</label>
-                        <EnhancedInput
-                          placeholder="John Doe"
-                          value={formData.businessCardHolderName}
-                          onChange={(e) => updateFormData("businessCardHolderName", e.target.value)}
-                          className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-orange-400 focus:ring-orange-400/20"
-                        />
-                      </div>
-                      
-                      <div className="relative">
-                        <label className="block text-sm font-medium text-white mb-2">Card Number</label>
-                        <EnhancedInput
-                          placeholder="•••• •••• •••• 1234"
-                          value={formData.businessCardNumber}
-                          onChange={(e) => updateFormData("businessCardNumber", e.target.value)}
-                          maxLength={19}
-                          className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-orange-400 focus:ring-orange-400/20"
-                        />
-                        <div className="absolute right-3 top-10 flex gap-1">
-                          <div className="w-6 h-4 bg-white/30 rounded-sm"></div>
-                          <div className="w-6 h-4 bg-white/20 rounded-sm"></div>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-white mb-2">Expiry</label>
-                          <EnhancedInput
-                            placeholder="MM/YY"
-                            value={formData.businessCardExpiry}
-                            onChange={(e) => updateFormData("businessCardExpiry", e.target.value)}
-                            maxLength={5}
-                            className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-orange-400 focus:ring-orange-400/20"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-white mb-2">CVV</label>
-                          <EnhancedInput
-                            placeholder="•••"
-                            value={formData.businessCardCvv}
-                            onChange={(e) => updateFormData("businessCardCvv", e.target.value)}
-                            maxLength={4}
-                            type="password"
-                            className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-orange-400 focus:ring-orange-400/20"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Bank Form */}
-                {formData.businessPaymentMethod === "bank" && (
-                  <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-                    <div className="space-y-5">
-                      <div>
-                        <label className="block text-sm font-medium text-white mb-2">Account Holder</label>
-                        <EnhancedInput
-                          placeholder="AutoServe Pro LLC"
-                          value={formData.businessAccountHolderName}
-                          onChange={(e) => updateFormData("businessAccountHolderName", e.target.value)}
-                          className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-green-400 focus:ring-green-400/20"
-                        />
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium text-white mb-2">Bank Name</label>
-                        <EnhancedInput
-                          placeholder="Chase Bank"
-                          value={formData.businessBankName}
-                          onChange={(e) => updateFormData("businessBankName", e.target.value)}
-                          className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-green-400 focus:ring-green-400/20"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-white mb-2">Account Number</label>
-                          <EnhancedInput
-                            placeholder="123456789"
-                            value={formData.businessAccountNumber}
-                            onChange={(e) => updateFormData("businessAccountNumber", e.target.value)}
-                            className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-green-400 focus:ring-green-400/20"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-white mb-2">Routing Number</label>
-                          <EnhancedInput
-                            placeholder="021000021"
-                            value={formData.businessRoutingNumber}
-                            onChange={(e) => updateFormData("businessRoutingNumber", e.target.value)}
-                            maxLength={9}
-                            className="bg-white/20 border-white/30 text-white placeholder:text-white/60 focus:border-green-400 focus:ring-green-400/20"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Security Notice */}
-                <div className="mt-6 p-4 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-xl border border-emerald-400/30 backdrop-blur-sm">
-                  <div className="flex items-start gap-3">
-                    <div className="p-1 bg-emerald-400/20 rounded-full mt-0.5">
-                      <CheckCircle className="h-4 w-4 text-emerald-300" />
-                    </div>
-                    <div className="text-sm text-emerald-100">
-                      <span className="font-semibold">Bank-level Security:</span> All payment information is encrypted with AES-256 and stored securely. We never store CVV numbers.
-                    </div>
-                  </div>
-                </div>
+              <div className="flex items-center gap-2 text-slate-600">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                <span>Payment Setup Complete</span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-600">
+                <div className="w-2 h-2 bg-slate-500 rounded-full"></div>
+                <span>Ready for Bookings</span>
               </div>
             </div>
 
-            <FormField
-              label="Payment Terms"
-              description="Describe your payment terms and policies"
-            >
-              <EnhancedTextarea
-                placeholder="Payment due upon completion of service. We accept cash, credit cards, and checks. Fleet accounts available with approved credit..."
-                value={formData.paymentTerms}
-                onChange={(e) => updateFormData("paymentTerms", e.target.value)}
-                maxLength={300}
-                showCount
-                rows={3}
-              />
-            </FormField>
-          </FormSection>
-        );
-
-      case 8:
-        return (
-          <FormSection
-            title="Team & Experience"
-            description="Tell us about your team and credentials"
-          >
-            <FormGrid>
-              <FormField
-                label="Team Size"
-                description="Number of technicians and staff"
-              >
-                <EnhancedInput
-                  icon={<Users className="h-4 w-4" />}
-                  placeholder="5"
-                  value={formData.teamSize}
-                  onChange={(e) => updateFormData("teamSize", e.target.value)}
-                />
-              </FormField>
-
-              <FormField label="Years in Business">
-                <EnhancedInput
-                  icon={<Award className="h-4 w-4" />}
-                  placeholder="15"
-                  value={formData.yearsInBusiness}
-                  onChange={(e) =>
-                    updateFormData("yearsInBusiness", e.target.value)
-                  }
-                />
-              </FormField>
-            </FormGrid>
-
-            <FormField
-              label="Certifications & Awards"
-              description="ASE certifications, manufacturer training, awards, etc."
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {[
-                  "ASE Certified",
-                  "AAA Approved",
-                  "Better Business Bureau",
-                  "Manufacturer Certified",
-                  "NAPA AutoCare",
-                  "Bosch Service",
-                  "AC Delco",
-                  "Customer Choice Award",
-                ].map((cert) => (
-                  <label
-                    key={cert}
-                    className="flex items-center gap-2 p-3 rounded-lg border border-blue-200/50 hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-orange-50/50 cursor-pointer transition-all"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={formData.certifications.includes(cert)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          updateFormData("certifications", [
-                            ...formData.certifications,
-                            cert,
-                          ]);
-                        } else {
-                          updateFormData(
-                            "certifications",
-                            formData.certifications.filter((c) => c !== cert)
-                          );
-                        }
-                      }}
-                      className="rounded border-blue-300 text-blue-500 focus:ring-blue-500/20"
-                    />
-                    <span className="text-sm text-slate-700">{cert}</span>
-                  </label>
-                ))}
-              </div>
-            </FormField>
-          </FormSection>
+            <div className="mt-8 p-4 bg-blue-50 rounded-xl border border-blue-200">
+              <p className="text-sm text-blue-700 font-medium">
+                🚀 Your shop will be visible to customers in your area within 24 hours
+              </p>
+            </div>
+          </div>
         );
 
       default:
@@ -1101,22 +444,48 @@ export default function ShopProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4">
-      <div className="max-w-3xl mx-auto space-y-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-amber-100 p-6 relative">
+      {/* Success Completion Overlay */}
+      {isCompleting && (
+        <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-orange-50 to-amber-100 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-16 shadow-xl border border-blue-200/50">
+              <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl mx-auto mb-8 flex items-center justify-center shadow-lg">
+                <CheckCircle className="h-12 w-12 text-white" />
+              </div>
+              
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent mb-4">
+                Setup Complete!
+              </h2>
+              
+              <p className="text-xl text-slate-600 mb-8">
+                Welcome to Auto Serve
+              </p>
+              
+              <div className="flex items-center justify-center gap-3">
+                <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
+                <span className="text-slate-500">Opening dashboard...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-800 to-amber-700 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-800 to-amber-700 bg-clip-text text-transparent">
               Shop Profile Setup
             </h1>
-            <p className="text-slate-600 mt-1">
-              Complete your automotive shop profile to get started
+            <p className="text-xl text-slate-600 mt-2">
+              Complete your automotive shop profile to get started with Auto Serve
             </p>
           </div>
           <Button
             variant="outline"
             className="border-blue-200 text-slate-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-sky-50"
-            onClick={() => window.history.back()}
+            onClick={() => router.push('/')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
@@ -1124,68 +493,20 @@ export default function ShopProfilePage() {
         </div>
 
         {/* Progress Steps */}
-        <Card className="bg-white shadow-sm border border-slate-200 sticky top-0 z-20">
-          <CardContent className="p-4">
-            {/* Mobile: Vertical progress */}
-            <div className="md:hidden space-y-2">
-              <div className="flex items-center justify-between text-sm text-slate-600">
-                <span>
-                  Step {activeStep} of {steps.length}
-                </span>
-                <span>
-                  {Math.round((activeStep / steps.length) * 100)}% Complete
-                </span>
-              </div>
-              <div className="w-full bg-slate-200 rounded-full h-2">
-                <div
-                  className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${(activeStep / steps.length) * 100}%` }}
-                ></div>
-              </div>
-              <div className="flex items-center gap-2">
-                <div
-                  className={`p-2 rounded-lg ${"bg-gradient-to-r from-blue-500 to-blue-600 text-white"}`}
-                >
-                  {React.createElement(steps[activeStep - 1].icon, {
-                    className: "h-4 w-4",
-                  })}
-                </div>
-                <div>
-                  <div className="font-medium text-slate-800">
-                    {steps[activeStep - 1].title}
-                  </div>
-                  <div className="text-xs text-slate-500">Current Step</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Desktop: Steps wrap to remove scrollbar */}
-            <div
-              className="hidden md:flex flex-wrap items-center justify-center gap-3"
-              role="tablist"
-              aria-label="Shop profile steps"
-            >
+        <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50 sticky top-0 z-20 rounded-2xl">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-center gap-4">
               {steps.map((step, index) => (
-                <div
-                  key={step.id}
-                  className="flex items-center flex-shrink-0 my-1"
-                >
+                <div key={step.id} className="flex items-center">
                   <button
                     type="button"
-                    onClick={() => handleGoToStep(step.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ")
-                        handleGoToStep(step.id);
-                    }}
-                    aria-current={activeStep === step.id ? "step" : undefined}
-                    aria-label={`Go to ${step.title} step`}
-                    tabIndex={0}
-                    className={`flex items-center gap-2 px-4 h-10 rounded-full text-sm min-w-[110px] whitespace-nowrap ring-1 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 ${
+                    onClick={() => setActiveStep(step.id)}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium transition-all ${
                       activeStep === step.id
-                        ? "bg-blue-600 text-white ring-blue-600"
+                        ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg'
                         : activeStep > step.id
-                        ? "bg-blue-50 text-blue-700 ring-blue-200"
-                        : "bg-white text-slate-600 ring-slate-200"
+                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                        : 'bg-white text-slate-600 border border-slate-200'
                     }`}
                   >
                     {activeStep > step.id ? (
@@ -1193,12 +514,11 @@ export default function ShopProfilePage() {
                     ) : (
                       React.createElement(step.icon, { className: "h-4 w-4" })
                     )}
-                    <span className="font-medium hidden lg:block">
-                      {step.title}
-                    </span>
-                    <span className="font-medium lg:hidden">{step.short}</span>
+                    <span>{step.title}</span>
                   </button>
-                  {null}
+                  {index < steps.length - 1 && (
+                    <div className="w-8 h-0.5 bg-slate-200 mx-2"></div>
+                  )}
                 </div>
               ))}
             </div>
@@ -1206,7 +526,11 @@ export default function ShopProfilePage() {
         </Card>
 
         {/* Form Content */}
-        <div ref={formTopRef}>{renderStepContent()}</div>
+        <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50">
+          <CardContent className="p-8">
+            {renderStepContent()}
+          </CardContent>
+        </Card>
 
         {/* Navigation */}
         <div className="flex justify-between">
@@ -1214,22 +538,13 @@ export default function ShopProfilePage() {
             variant="outline"
             onClick={handlePrevious}
             disabled={activeStep === 1}
-            className="border-slate-300 text-slate-600 hover:bg-gradient-to-r hover:from-slate-50 hover:to-gray-50"
+            className="border-slate-300 text-slate-600 hover:bg-slate-50"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Previous
           </Button>
 
           <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={handleSave}
-              className="border-blue-200 text-blue-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-sky-50"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              Save Draft
-            </Button>
-
             {activeStep < steps.length ? (
               <Button
                 onClick={handleNext}
@@ -1240,7 +555,7 @@ export default function ShopProfilePage() {
               </Button>
             ) : (
               <Button
-                onClick={handleSave}
+                onClick={handleComplete}
                 className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg"
               >
                 <CheckCircle className="h-4 w-4 mr-2" />
