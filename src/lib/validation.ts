@@ -1,4 +1,4 @@
-import { ServiceMenuData } from './services';
+import { ServiceMenuData, getMinPrice } from './services';
 
 export interface ValidationError {
   field: string;
@@ -69,7 +69,7 @@ export function validateServiceMenu(serviceMenuData: ServiceMenuData): Validatio
 
   // Extra services validation
   extraServices.forEach((service, index) => {
-    if (service.price <= 0) {
+    if (getMinPrice(service.pricing) <= 0) {
       errors.push({
         field: `extraServices.${index}.price`,
         message: `Extra service "${service.name}" must have a price greater than $0`
@@ -277,14 +277,15 @@ export function validatePricingReasonableness(serviceMenuData: ServiceMenuData):
 
   // Check extra service pricing
   extraServices.forEach((service, index) => {
-    if (service.price > 200 && !service.name.toLowerCase().includes('diagnostic')) {
+    const minPrice = getMinPrice(service.pricing);
+    if (minPrice > 200 && !service.name.toLowerCase().includes('diagnostic')) {
       warnings.push({
         field: `extraServices.${index}.price`,
         message: `"${service.name}" price seems high for an individual service`
       });
     }
 
-    if (service.price < 20) {
+    if (minPrice < 20) {
       warnings.push({
         field: `extraServices.${index}.price`,
         message: `"${service.name}" price seems low for professional service`

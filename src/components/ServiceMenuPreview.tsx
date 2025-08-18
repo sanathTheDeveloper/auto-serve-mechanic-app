@@ -17,8 +17,11 @@ import {
 import {
   ServiceMenuData,
   Service,
+  ExtraService,
   getServiceById,
-  formatDuration
+  formatDuration,
+  getMinPrice,
+  formatServicePricing
 } from '@/lib/services';
 
 interface ServiceMenuPreviewProps {
@@ -43,7 +46,7 @@ export function ServiceMenuPreview({ serviceMenuData, shopName = "Your Auto Shop
                         selectedPackage === 'full' ? fullPackage.price : 0;
     const extrasPrice = selectedExtras.reduce((total, serviceId) => {
       const service = extraServices.find(s => s.id === serviceId);
-      return total + (service?.price || 0);
+      return total + (service ? getMinPrice(service.pricing) : 0);
     }, 0);
     return packagePrice + extrasPrice;
   };
@@ -157,7 +160,7 @@ export function ServiceMenuPreview({ serviceMenuData, shopName = "Your Auto Shop
                 return service ? (
                   <div key={serviceId} className="flex justify-between items-center py-2 border-b border-blue-400/30">
                     <span>{service.name}</span>
-                    <span>${service.price}</span>
+                    <span>{formatServicePricing(service.pricing)}</span>
                   </div>
                 ) : null;
               })}
@@ -293,17 +296,7 @@ function ServicePackageCard({
 
 // Extra Service Card Component
 interface ExtraServiceCardProps {
-  service: {
-    id: string;
-    name: string;
-    description: string;
-    estimatedTime: number;
-    category: string;
-    isCustom: boolean;
-    icon?: string;
-    price: number;
-    standalone: true;
-  };
+  service: ExtraService;
   isSelected: boolean;
   onToggle: () => void;
 }
@@ -328,7 +321,7 @@ function ExtraServiceCard({ service, isSelected, onToggle }: ExtraServiceCardPro
             </div>
           </div>
           <div className="text-right">
-            <div className="font-bold text-slate-800">${service.price}</div>
+            <div className="font-bold text-slate-800">{formatServicePricing(service.pricing)}</div>
             <div className="text-xs text-slate-500 flex items-center gap-1">
               <Clock className="h-3 w-3" />
               {formatDuration(service.estimatedTime)}

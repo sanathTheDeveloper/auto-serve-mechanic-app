@@ -30,7 +30,8 @@ import {
   SERVICE_CATEGORIES,
   getServiceById,
   calculatePackageTime,
-  formatDuration
+  formatDuration,
+  getMinPrice
 } from '@/lib/services';
 import { validateServiceMenu, validatePricingReasonableness, ValidationError } from '@/lib/validation';
 
@@ -148,7 +149,7 @@ export function ServicePackageBuilder({ initialData, onDataChange }: ServicePack
   const addExtraService = (service: Service, price: number) => {
     const extraService: ExtraService = {
       ...service,
-      price,
+      pricing: { model: 'fixed', fixed: price },
       standalone: true
     };
 
@@ -694,7 +695,7 @@ function ExtraServicesEditor({ extraServices, onPriceChange, onRemoveService, on
                 <ServiceCard
                   key={service.id}
                   service={service}
-                  price={service.price}
+                  price={getMinPrice(service.pricing)}
                   onPriceChange={(price) => onPriceChange(service.id, price)}
                   onRemove={() => onRemoveService(service.id)}
                   showPrice={true}

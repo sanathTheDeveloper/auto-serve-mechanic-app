@@ -30,6 +30,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ServiceMenuManager } from "@/components/ServiceMenuManager";
 
 const navigationItems = [
   { id: "overview", icon: Home, label: "Overview" },
@@ -520,34 +521,7 @@ export default function DashboardSPA() {
         );
 
       case "services":
-        return (
-          <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
-                    Service Menu Customization
-                  </h2>
-                  <p className="text-slate-600 mt-1">
-                    Define what&apos;s included in basic vs full service, pricing,
-                    and packages
-                  </p>
-                </div>
-                <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
-                  <Wrench className="h-4 w-4 mr-2" />
-                  Add Service
-                </Button>
-              </div>
-              <div className="text-center py-12 text-slate-500">
-                <Wrench className="h-16 w-16 mx-auto mb-4 text-slate-300" />
-                <p>Service menu customization and pricing management</p>
-                <p className="text-sm">
-                  Configure your offerings for customers
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        );
+        return <ServiceMenuManager />;
 
       case "payments":
         return (

@@ -17,8 +17,18 @@ export interface ServicePackage {
   estimatedTime: number;
 }
 
+export type PricingModel = 'fixed' | 'range' | 'starts-at';
+
+export interface ServicePricing {
+  model: PricingModel;
+  fixed?: number;
+  min?: number;
+  max?: number;
+  startsAt?: number;
+}
+
 export interface ExtraService extends Service {
-  price: number;
+  pricing: ServicePricing;
   standalone: true;
 }
 
@@ -313,7 +323,7 @@ export const DEFAULT_EXTRA_SERVICES: ExtraService[] = [
     category: 'tires',
     isCustom: false,
     icon: '🔄',
-    price: 49,
+    pricing: { model: 'fixed', fixed: 49 },
     standalone: true
   },
   {
@@ -324,7 +334,7 @@ export const DEFAULT_EXTRA_SERVICES: ExtraService[] = [
     category: 'tires',
     isCustom: false,
     icon: '⚖️',
-    price: 75,
+    pricing: { model: 'range', min: 65, max: 85 },
     standalone: true
   },
   {
@@ -335,7 +345,7 @@ export const DEFAULT_EXTRA_SERVICES: ExtraService[] = [
     category: 'specialty',
     isCustom: false,
     icon: '💻',
-    price: 89,
+    pricing: { model: 'starts-at', startsAt: 89 },
     standalone: true
   }
 ];
@@ -376,3 +386,43 @@ export const SERVICE_CATEGORIES = [
   { id: 'repair', name: 'Repair', icon: '🛠️', color: 'orange' },
   { id: 'specialty', name: 'Specialty', icon: '⭐', color: 'purple' }
 ] as const;
+
+// Utility functions for pricing
+export function formatServicePricing(pricing: ServicePricing): string {
+  switch (pricing.model) {
+    case 'fixed':
+      return `$${pricing.fixed}`;
+    case 'range':
+      return `$${pricing.min} - $${pricing.max}`;
+    case 'starts-at':
+      return `From $${pricing.startsAt}`;
+    default:
+      return '$0';
+  }
+}
+
+export function getMinPrice(pricing: ServicePricing): number {
+  switch (pricing.model) {
+    case 'fixed':
+      return pricing.fixed || 0;
+    case 'range':
+      return pricing.min || 0;
+    case 'starts-at':
+      return pricing.startsAt || 0;
+    default:
+      return 0;
+  }
+}
+
+export function createDefaultPricing(model: PricingModel = 'fixed'): ServicePricing {
+  switch (model) {
+    case 'fixed':
+      return { model: 'fixed', fixed: 0 };
+    case 'range':
+      return { model: 'range', min: 0, max: 0 };
+    case 'starts-at':
+      return { model: 'starts-at', startsAt: 0 };
+    default:
+      return { model: 'fixed', fixed: 0 };
+  }
+}
