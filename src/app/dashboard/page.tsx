@@ -797,8 +797,8 @@ export default function DashboardSPA() {
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-slate-800 capitalize">
-                {currentPage}
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
+                {currentPage === "services" ? "Service Menu Customization" : currentPage}
               </h1>
               <p className="text-slate-600 text-sm mt-1">
                 {currentPage === "overview"
