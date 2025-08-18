@@ -188,6 +188,58 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+// Real-time field validation utilities
+export function validateEmail(email: string): { isValid: boolean; message?: string } {
+  if (!email) return { isValid: true };
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return { isValid: false, message: 'Please enter a valid email address' };
+  }
+  return { isValid: true };
+}
+
+export function validateAustralianPhone(phone: string): { isValid: boolean; message?: string } {
+  if (!phone) return { isValid: true };
+  // Remove all non-digits
+  const digits = phone.replace(/\D/g, '');
+  
+  // Australian phone number patterns
+  const mobilePattern = /^(04|\+614)\d{8}$/; // Mobile: 04XX XXX XXX or +614XX XXX XXX
+  const landlinePattern = /^(0[2-8]|\+612[2-8])\d{8}$/; // Landline: 0X XXXX XXXX or +612X XXXX XXXX
+  
+  if (digits.length < 10) {
+    return { isValid: false, message: 'Phone number must be at least 10 digits' };
+  }
+  
+  if (!mobilePattern.test(digits) && !landlinePattern.test(digits)) {
+    return { isValid: false, message: 'Please enter a valid Australian phone number' };
+  }
+  
+  return { isValid: true };
+}
+
+export function validateAustralianPostcode(postcode: string): { isValid: boolean; message?: string } {
+  if (!postcode) return { isValid: true };
+  const postcodePattern = /^\d{4}$/;
+  if (!postcodePattern.test(postcode)) {
+    return { isValid: false, message: 'Please enter a valid 4-digit postcode' };
+  }
+  return { isValid: true };
+}
+
+export function validateWebsiteUrl(url: string): { isValid: boolean; message?: string } {
+  if (!url) return { isValid: true };
+  try {
+    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
+    if (!urlPattern.test(url)) {
+      return { isValid: false, message: 'Please enter a valid website URL' };
+    }
+    return { isValid: true };
+  } catch {
+    return { isValid: false, message: 'Please enter a valid website URL' };
+  }
+}
+
 // Utility to validate pricing reasonableness
 export function validatePricingReasonableness(serviceMenuData: ServiceMenuData): ValidationError[] {
   const warnings: ValidationError[] = [];

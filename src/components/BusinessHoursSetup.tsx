@@ -15,7 +15,8 @@ import {
   RotateCcw,
   CheckCircle,
   Sun,
-  Zap
+  Zap,
+  Info
 } from 'lucide-react';
 
 interface TimeSlot {
@@ -46,6 +47,8 @@ interface BusinessHoursSetupProps {
       name: string;
       isOpen: boolean;
       timeSlots?: TimeSlot[];
+      isHoliday?: boolean;
+      isPreset?: boolean;
     }>;
   };
   onDataChange: (data: Record<string, unknown>) => void;
@@ -74,8 +77,9 @@ export function BusinessHoursSetup({ initialData, onDataChange }: BusinessHoursS
 
   const [timezone, setTimezone] = useState(initialData?.timezone || 'Australia/Melbourne');
   const [activeTab, setActiveTab] = useState<'hours' | 'breaks' | 'special'>('hours');
-  // const [specialDays, setSpecialDays] = useState(initialData?.specialDays || []);
+  const [specialDays, setSpecialDays] = useState(initialData?.specialDays || []);
   const [showQuickSetup, setShowQuickSetup] = useState(false);
+  const [loadedHolidays, setLoadedHolidays] = useState(false);
 
   const timezones = [
     { id: 'Australia/Melbourne', name: 'Melbourne (AEST/AEDT)' },
@@ -85,6 +89,64 @@ export function BusinessHoursSetup({ initialData, onDataChange }: BusinessHoursS
     { id: 'Australia/Adelaide', name: 'Adelaide (ACST/ACDT)' },
     { id: 'Australia/Darwin', name: 'Darwin (ACST)' }
   ];
+
+  // Victorian Public Holidays for 2024/2025
+  const getVictorianPublicHolidays = () => {
+    const currentYear = new Date().getFullYear();
+    const nextYear = currentYear + 1;
+    
+    return [
+      // Current year holidays
+      { date: `${currentYear}-01-01`, name: "New Year's Day", isFixed: true },
+      { date: `${currentYear}-01-26`, name: "Australia Day", isFixed: true },
+      { date: `${currentYear}-03-11`, name: "Labour Day", isFixed: false },
+      { date: `${currentYear}-03-29`, name: "Good Friday", isFixed: false },
+      { date: `${currentYear}-03-30`, name: "Easter Saturday", isFixed: false },
+      { date: `${currentYear}-04-01`, name: "Easter Monday", isFixed: false },
+      { date: `${currentYear}-04-25`, name: "ANZAC Day", isFixed: true },
+      { date: `${currentYear}-06-10`, name: "King's Birthday", isFixed: false },
+      { date: `${currentYear}-09-27`, name: "AFL Grand Final Friday", isFixed: false },
+      { date: `${currentYear}-11-05`, name: "Melbourne Cup Day", isFixed: false },
+      { date: `${currentYear}-12-25`, name: "Christmas Day", isFixed: true },
+      { date: `${currentYear}-12-26`, name: "Boxing Day", isFixed: true },
+      
+      // Next year holidays (first quarter)
+      { date: `${nextYear}-01-01`, name: "New Year's Day", isFixed: true },
+      { date: `${nextYear}-01-27`, name: "Australia Day (observed)", isFixed: true },
+      { date: `${nextYear}-03-10`, name: "Labour Day", isFixed: false },
+    ];
+  };
+
+  const loadPublicHolidays = () => {
+    if (loadedHolidays) return;
+    
+    const holidays = getVictorianPublicHolidays();
+    const holidaySpecialDays = holidays.map(holiday => ({
+      date: holiday.date,
+      name: holiday.name,
+      isOpen: false, // Default to closed
+      timeSlots: [] as TimeSlot[],
+      isHoliday: true,
+      isPreset: true
+    }));
+    
+    setSpecialDays(prev => {
+      // Only add holidays that aren't already in the list
+      const existingDates = new Set(prev.map(day => day.date));
+      const newHolidays = holidaySpecialDays.filter(holiday => !existingDates.has(holiday.date));
+      return [...prev, ...newHolidays];
+    });
+    
+    setLoadedHolidays(true);
+  };
+
+  const toggleHolidayStatus = (date: string) => {
+    setSpecialDays(prev => prev.map(day => 
+      day.date === date 
+        ? { ...day, isOpen: !day.isOpen, timeSlots: day.isOpen ? [] : [{ start: '08:00', end: '17:00' }] }
+        : day
+    ));
+  };
 
   const quickSetupTemplates = [
     {
@@ -121,10 +183,10 @@ export function BusinessHoursSetup({ initialData, onDataChange }: BusinessHoursS
       schedule,
       timezone,
       lunchBreak,
-      specialDays: []
+      specialDays
     };
     onDataChange(data);
-  }, [schedule, timezone, lunchBreak]);
+  }, [schedule, timezone, lunchBreak, specialDays]);
 
   const toggleDayOpen = (dayIndex: number) => {
     const newSchedule = [...schedule];
@@ -232,6 +294,22 @@ export function BusinessHoursSetup({ initialData, onDataChange }: BusinessHoursS
       {/* Operating Hours Tab */}
       {activeTab === 'hours' && (
         <div className="space-y-6">
+          {/* Contextual Help */}
+          <Card className="bg-gradient-to-r from-blue-50 to-sky-50 border border-blue-200/50">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <Info className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                <div>
+                  <h4 className="font-semibold text-blue-800 mb-1">Important: Accurate Hours Matter</h4>
+                  <p className="text-sm text-blue-700">
+                    Your availability on the customer app is based directly on these hours. 
+                    Keeping them accurate will prevent booking conflicts and ensure smooth operations.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Quick Setup & Summary */}
           <Card className="bg-gradient-to-r from-blue-50 to-amber-50 border border-blue-200/50">
             <CardContent className="p-6">
@@ -525,33 +603,154 @@ export function BusinessHoursSetup({ initialData, onDataChange }: BusinessHoursS
 
       {/* Special Days Tab */}
       {activeTab === 'special' && (
-        <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-xl text-slate-800">
-              <Calendar className="h-5 w-5 text-blue-500" />
-              Special Days & Holidays
-            </CardTitle>
-            <p className="text-slate-600">
-              Configure special hours for holidays and other exceptional days
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="text-center py-12 text-slate-500">
-              <Calendar className="h-16 w-16 mx-auto mb-4 text-slate-300" />
-              <p className="font-medium mb-2">Holiday Management</p>
-              <p className="text-sm mb-4">
-                Set special hours for public holidays, maintenance days, or other exceptions
+        <div className="space-y-6">
+          {/* Load Holidays Button */}
+          {!loadedHolidays && (
+            <Card className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/50">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-semibold text-amber-800 mb-2">Victorian Public Holidays</h4>
+                    <p className="text-sm text-amber-700">
+                      Automatically load all official Victorian public holidays for easy configuration
+                    </p>
+                  </div>
+                  <Button
+                    onClick={loadPublicHolidays}
+                    className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600"
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Load Public Holidays
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-xl text-slate-800">
+                <Calendar className="h-5 w-5 text-blue-500" />
+                Special Days & Holidays
+              </CardTitle>
+              <p className="text-slate-600">
+                Configure special hours for holidays and other exceptional days
               </p>
-              <Button
-                variant="outline"
-                className="text-blue-600 border-blue-200 hover:bg-blue-50"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Special Day
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {specialDays.length === 0 ? (
+                <div className="text-center py-12 text-slate-500">
+                  <Calendar className="h-16 w-16 mx-auto mb-4 text-slate-300" />
+                  <p className="font-medium mb-2">No Special Days Configured</p>
+                  <p className="text-sm mb-4">
+                    {loadedHolidays 
+                      ? 'All holidays have been processed or no upcoming holidays found'
+                      : 'Load Victorian public holidays or add custom special days'
+                    }
+                  </p>
+                  {!loadedHolidays && (
+                    <Button
+                      onClick={loadPublicHolidays}
+                      variant="outline"
+                      className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                    >
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Load Public Holidays
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Holiday List */}
+                  <div className="grid gap-3">
+                    {specialDays
+                      .filter(day => new Date(day.date) >= new Date())
+                      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                      .map((day) => (
+                      <Card key={day.date} className="border border-slate-200">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="text-center">
+                                <div className="text-lg font-bold text-slate-800">
+                                  {new Date(day.date).getDate()}
+                                </div>
+                                <div className="text-xs text-slate-600 uppercase">
+                                  {new Date(day.date).toLocaleDateString('en-AU', { month: 'short' })}
+                                </div>
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-slate-800 flex items-center gap-2">
+                                  {day.name}
+                                  {day.isHoliday && (
+                                    <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full">
+                                      Public Holiday
+                                    </span>
+                                  )}
+                                </h4>
+                                <p className="text-sm text-slate-600">
+                                  {new Date(day.date).toLocaleDateString('en-AU', { 
+                                    weekday: 'long', 
+                                    year: 'numeric', 
+                                    month: 'long', 
+                                    day: 'numeric' 
+                                  })}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-3">
+                              <div className="text-right">
+                                <div className={`text-sm font-medium ${
+                                  day.isOpen ? 'text-emerald-600' : 'text-red-600'
+                                }`}>
+                                  {day.isOpen ? 'Open' : 'Closed'}
+                                </div>
+                                {day.isOpen && day.timeSlots && day.timeSlots.length > 0 && (
+                                  <div className="text-xs text-slate-500">
+                                    {formatTime(day.timeSlots[0].start)} - {formatTime(day.timeSlots[0].end)}
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <button
+                                onClick={() => toggleHolidayStatus(day.date)}
+                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                  day.isOpen ? 'bg-emerald-500' : 'bg-slate-300'
+                                }`}
+                              >
+                                <span
+                                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                    day.isOpen ? 'translate-x-6' : 'translate-x-1'
+                                  }`}
+                                />
+                              </button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                  
+                  {/* Summary */}
+                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="h-4 w-4 text-blue-500" />
+                      <span className="text-sm font-medium text-blue-800">
+                        Holiday Configuration Complete
+                      </span>
+                    </div>
+                    <p className="text-xs text-blue-700">
+                      {specialDays.filter(day => day.isOpen).length} holidays configured as open, {' '}
+                      {specialDays.filter(day => !day.isOpen).length} as closed. 
+                      Customers will see these special hours when booking.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

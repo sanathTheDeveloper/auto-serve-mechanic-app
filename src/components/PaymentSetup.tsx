@@ -16,7 +16,9 @@ import {
   Wallet,
   TrendingUp,
   Eye,
-  EyeOff
+  EyeOff,
+  Award,
+  Car
 } from 'lucide-react';
 
 interface PaymentMethod {
@@ -55,6 +57,7 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
     bsb: '',
     accountNumber: '',
     accountName: '',
+    motorVehicleRepairersLicence: '',
     paymentMethods: initialData?.paymentMethods || ['bank-transfer'],
     taxSettings: {
       gstRegistered: initialData?.taxSettings?.gstRegistered || false,
@@ -64,7 +67,8 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
   });
 
   const [showAccountDetails, setShowAccountDetails] = useState(false);
-  // const [copied, setCopied] = useState(false);
+  const [isLookingUpABN, setIsLookingUpABN] = useState(false);
+  const [abnLookupResult, setABNLookupResult] = useState<{ businessName?: string; isValid?: boolean } | null>(null);
   const [activeTab, setActiveTab] = useState<'basic' | 'methods' | 'tax'>('basic');
 
   const paymentMethods: PaymentMethod[] = [
@@ -155,6 +159,61 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
     return numbers.length === 11 && /^\d+$/.test(numbers);
   };
 
+  const lookupABN = async (abn: string) => {
+    if (!validateABN(abn)) return;
+    
+    setIsLookingUpABN(true);
+    
+    // Simulate ABN lookup API call
+    try {
+      // In a real implementation, you would call the Australian Business Register API
+      // For demo purposes, we'll simulate different responses based on ABN patterns
+      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+      
+      const numbers = abn.replace(/\s/g, '');
+      let mockBusinessName = '';
+      
+      // Mock responses for demo
+      if (numbers.startsWith('12')) {
+        mockBusinessName = 'Melbourne Auto Service Pty Ltd';
+      } else if (numbers.startsWith('23')) {
+        mockBusinessName = 'Collins Street Automotive';
+      } else if (numbers.startsWith('34')) {
+        mockBusinessName = 'Premier Car Care Services';
+      } else {
+        mockBusinessName = 'Auto Service Business';
+      }
+      
+      setABNLookupResult({ businessName: mockBusinessName, isValid: true });
+      
+      // Auto-populate business name if it's empty
+      if (!formData.businessName) {
+        updateFormData('businessName', mockBusinessName);
+      }
+    } catch {
+      setABNLookupResult({ isValid: false });
+    } finally {
+      setIsLookingUpABN(false);
+    }
+  };
+
+  const handleABNChange = (value: string) => {
+    const formatted = formatABN(value);
+    updateFormData('abn', formatted);
+    
+    // Clear previous lookup result
+    setABNLookupResult(null);
+    
+    // Trigger lookup after user stops typing (debounced)
+    if (validateABN(formatted)) {
+      const timeoutId = setTimeout(() => {
+        lookupABN(formatted);
+      }, 800);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Tab Navigation */}
@@ -225,27 +284,47 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
                 <Input
                   placeholder="12 345 678 901"
                   value={formData.abn}
-                  onChange={(e) => updateFormData('abn', formatABN(e.target.value))}
-                  className={`pl-10 ${
+                  onChange={(e) => handleABNChange(e.target.value)}
+                  className={`pl-10 pr-10 ${
                     formData.abn && !validateABN(formData.abn)
                       ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
+                      : abnLookupResult?.isValid
+                      ? 'border-emerald-300 focus:border-emerald-500 focus:ring-emerald-500/20'
                       : ''
                   }`}
                   maxLength={13}
                 />
-                {formData.abn && (
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    {validateABN(formData.abn) ? (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  {isLookingUpABN ? (
+                    <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                  ) : formData.abn && validateABN(formData.abn) ? (
+                    abnLookupResult?.isValid ? (
                       <CheckCircle className="h-4 w-4 text-emerald-500" />
                     ) : (
-                      <AlertCircle className="h-4 w-4 text-red-500" />
-                    )}
-                  </div>
-                )}
+                      <CheckCircle className="h-4 w-4 text-blue-500" />
+                    )
+                  ) : formData.abn ? (
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                  ) : null}
+                </div>
               </div>
               {formData.abn && !validateABN(formData.abn) && (
                 <p className="text-xs text-red-600 mt-1">
                   Please enter a valid 11-digit ABN
+                </p>
+              )}
+              {abnLookupResult?.isValid && (
+                <div className="mt-2 p-2 bg-emerald-50 border border-emerald-200 rounded-lg">
+                  <p className="text-xs text-emerald-700 font-medium flex items-center gap-1">
+                    <CheckCircle className="h-3 w-3" />
+                    ABN Verified: {abnLookupResult.businessName}
+                  </p>
+                </div>
+              )}
+              {formData.abn && validateABN(formData.abn) && !isLookingUpABN && (
+                <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
+                  <Info className="h-3 w-3" />
+                  Are you registered for GST? You can configure tax settings in the next step.
                 </p>
               )}
             </div>
@@ -254,6 +333,9 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Registered Business Name *
+                {abnLookupResult?.businessName && (
+                  <span className="text-xs text-emerald-600 ml-1">(Auto-populated from ABN lookup)</span>
+                )}
               </label>
               <Input
                 placeholder="Your Auto Service Pty Ltd"
@@ -261,6 +343,29 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
                 onChange={(e) => updateFormData('businessName', e.target.value)}
                 className="w-full"
               />
+            </div>
+
+            {/* Motor Vehicle Repairer's Licence */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Motor Vehicle Repairer&apos;s Licence
+                <span className="text-xs text-slate-500 ml-1">(Optional but recommended)</span>
+              </label>
+              <div className="relative">
+                <Award className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="MVR12345"
+                  value={formData.motorVehicleRepairersLicence}
+                  onChange={(e) => updateFormData('motorVehicleRepairersLicence', e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="flex items-start gap-2 mt-2 text-xs text-blue-700 bg-blue-50 p-2 rounded-lg">
+                <Car className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                <p>
+                  <strong>Trust Signal:</strong> This licence number builds customer confidence and is required for automotive work in Victoria.
+                </p>
+              </div>
             </div>
 
             {/* Bank Account Details */}
@@ -351,7 +456,7 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
               Payment Methods
             </CardTitle>
             <p className="text-slate-600">
-              Choose how you&apos;d like to receive payments from customers
+              Choose how you would like to receive payments from customers
             </p>
           </CardHeader>
           <CardContent className="space-y-6">

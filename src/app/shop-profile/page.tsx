@@ -12,6 +12,7 @@ import { ServiceMenuPreview } from '@/components/ServiceMenuPreview';
 import { PaymentSetup } from '@/components/PaymentSetup';
 import { BusinessHoursSetup } from '@/components/BusinessHoursSetup';
 import { ServiceMenuData, DEFAULT_BASIC_PACKAGE, DEFAULT_FULL_PACKAGE, DEFAULT_EXTRA_SERVICES } from '@/lib/services';
+import { validateEmail, validateAustralianPhone, validateAustralianPostcode, validateWebsiteUrl } from '@/lib/validation';
 import {
   Building2,
   MapPin,
@@ -24,6 +25,8 @@ import {
   CreditCard,
   Car,
   Eye,
+  Globe,
+  AlertCircle,
 } from "lucide-react";
 
 export default function ShopProfilePage() {
@@ -92,6 +95,9 @@ export default function ShopProfilePage() {
     },
     specialDays: []
   });
+
+  // Real-time validation state
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   // Redirect to auth if not authenticated
   useEffect(() => {
@@ -223,7 +229,45 @@ export default function ShopProfilePage() {
 
   const updateFormData = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear validation error when user starts typing
+    if (validationErrors[field]) {
+      setValidationErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+    
+    // Real-time validation
+    validateField(field, value);
   };
+
+  const validateField = (field: string, value: string) => {
+    let validation: { isValid: boolean; message?: string } = { isValid: true };
+    
+    switch (field) {
+      case 'email':
+        validation = validateEmail(value);
+        break;
+      case 'phone':
+        validation = validateAustralianPhone(value);
+        break;
+      case 'zipCode':
+        validation = validateAustralianPostcode(value);
+        break;
+      case 'website':
+        validation = validateWebsiteUrl(value);
+        break;
+    }
+    
+    if (!validation.isValid && validation.message) {
+      setValidationErrors(prev => ({ ...prev, [field]: validation.message || '' }));
+    }
+  };
+
+  const getFieldError = (field: string) => validationErrors[field];
+  const hasFieldError = (field: string) => !!validationErrors[field];
 
   const renderStepContent = () => {
     switch (activeStep) {
@@ -252,7 +296,7 @@ export default function ShopProfilePage() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">Business Description</label>
                 <textarea
-                  placeholder="Professional automotive service specializing in general maintenance, brake repairs, and tire services..."
+                  placeholder="Tell customers what makes your shop unique. Mention your specialties, years of experience, or any special equipment you have."
                   value={formData.description}
                   onChange={(e) => updateFormData("description", e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
@@ -270,9 +314,15 @@ export default function ShopProfilePage() {
                       placeholder="contact@melbourneautocare.com.au"
                       value={formData.email}
                       onChange={(e) => updateFormData("email", e.target.value)}
-                      className="pl-10"
+                      className={`pl-10 ${hasFieldError('email') ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
                     />
+                    {hasFieldError('email') && (
+                      <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-500" />
+                    )}
                   </div>
+                  {getFieldError('email') && (
+                    <p className="text-xs text-red-600 mt-1">{getFieldError('email')}</p>
+                  )}
                 </div>
 
                 <div>
@@ -280,13 +330,41 @@ export default function ShopProfilePage() {
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
-                      placeholder="(03) 9XXX XXXX"
+                      placeholder="(03) 9XXX XXXX or 04XX XXX XXX"
                       value={formData.phone}
                       onChange={(e) => updateFormData("phone", e.target.value)}
-                      className="pl-10"
+                      className={`pl-10 ${hasFieldError('phone') ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
                     />
+                    {hasFieldError('phone') && (
+                      <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-500" />
+                    )}
                   </div>
+                  {getFieldError('phone') && (
+                    <p className="text-xs text-red-600 mt-1">{getFieldError('phone')}</p>
+                  )}
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Website/Social Media</label>
+                <div className="relative">
+                  <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="https://www.yourshop.com.au or @yourshop"
+                    value={formData.website}
+                    onChange={(e) => updateFormData("website", e.target.value)}
+                    className={`pl-10 ${hasFieldError('website') ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20' : ''}`}
+                  />
+                  {hasFieldError('website') && (
+                    <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-500" />
+                  )}
+                </div>
+                {getFieldError('website') && (
+                  <p className="text-xs text-red-600 mt-1">{getFieldError('website')}</p>
+                )}
+                <p className="text-xs text-slate-500 mt-1">
+                  Optional: Your website URL, Facebook page, or Instagram handle
+                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -314,11 +392,21 @@ export default function ShopProfilePage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-2">Postcode *</label>
-                    <Input
-                      placeholder="3000"
-                      value={formData.zipCode}
-                      onChange={(e) => updateFormData("zipCode", e.target.value)}
-                    />
+                    <div className="relative">
+                      <Input
+                        placeholder="3000"
+                        value={formData.zipCode}
+                        onChange={(e) => updateFormData("zipCode", e.target.value)}
+                        className={hasFieldError('zipCode') ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20 pr-10' : ''}
+                        maxLength={4}
+                      />
+                      {hasFieldError('zipCode') && (
+                        <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-red-500" />
+                      )}
+                    </div>
+                    {getFieldError('zipCode') && (
+                      <p className="text-xs text-red-600 mt-1">{getFieldError('zipCode')}</p>
+                    )}
                   </div>
                 </div>
               </div>

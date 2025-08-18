@@ -12,7 +12,11 @@ import {
   Wrench,
   Check,
   X,
-  Search
+  Search,
+  Info,
+  TrendingUp,
+  TrendingDown,
+  AlertTriangle
 } from 'lucide-react';
 import {
   Service,
@@ -109,6 +113,36 @@ export function ServicePackageBuilder({ initialData, onDataChange }: ServicePack
         price
       }
     }));
+  };
+
+  const getPriceFeedback = (packageType: 'basic' | 'full', price: number) => {
+    const warnings = validatePricingReasonableness({
+      ...serviceMenuData,
+      [`${packageType}Package`]: {
+        ...serviceMenuData[`${packageType}Package`],
+        price
+      }
+    });
+    
+    const relevantWarning = warnings.find(w => w.field === `${packageType}Package.price`);
+    
+    if (!relevantWarning) {
+      if (packageType === 'basic' && price >= 50 && price <= 200) {
+        return { type: 'good', message: 'This price is competitive for your area', icon: <TrendingUp className="h-3 w-3" /> };
+      } else if (packageType === 'full' && price >= 100 && price <= 400) {
+        return { type: 'good', message: 'This price is competitive for your area', icon: <TrendingUp className="h-3 w-3" /> };
+      }
+    }
+    
+    if (relevantWarning) {
+      if (relevantWarning.message.includes('low')) {
+        return { type: 'warning', message: 'Note: This price is lower than the average', icon: <TrendingDown className="h-3 w-3" /> };
+      } else if (relevantWarning.message.includes('high')) {
+        return { type: 'warning', message: 'Note: This price is higher than the average', icon: <AlertTriangle className="h-3 w-3" /> };
+      }
+    }
+    
+    return null;
   };
 
   const addExtraService = (service: Service, price: number) => {
@@ -228,6 +262,20 @@ export function ServicePackageBuilder({ initialData, onDataChange }: ServicePack
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-lg">{service.icon}</span>
                             <h4 className="font-semibold text-slate-800">{service.name}</h4>
+                            <div className="group relative">
+                              <Info className="h-3 w-3 text-slate-400 cursor-help" />
+                              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10 w-64">
+                                <p className="font-medium mb-1">How customers see this service:</p>
+                                <p className="text-slate-200">&ldquo;{service.description}&rdquo;</p>
+                                <div className="text-slate-300 mt-1">
+                                  <span className="flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    Estimated: {formatDuration(service.estimatedTime)}
+                                  </span>
+                                </div>
+                                <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-slate-800"></div>
+                              </div>
+                            </div>
                           </div>
                           <p className="text-sm text-slate-600 mb-2">{service.description}</p>
                           <div className="flex items-center gap-3 text-xs text-slate-500">
@@ -481,6 +529,7 @@ export function ServicePackageBuilder({ initialData, onDataChange }: ServicePack
           onPriceChange={(price) => updatePackagePrice(activeTab, price)}
           onToggleService={(serviceId) => toggleServiceInPackage(serviceId, activeTab)}
           onShowLibrary={() => setShowServiceLibrary(true)}
+          getPriceFeedback={(price) => getPriceFeedback(activeTab, price)}
         />
       )}
 
@@ -504,9 +553,10 @@ interface PackageEditorProps {
   onPriceChange: (price: number) => void;
   onToggleService: (serviceId: string) => void;
   onShowLibrary: () => void;
+  getPriceFeedback?: (price: number) => { type: string; message: string; icon: React.ReactNode } | null;
 }
 
-function PackageEditor({ package: pkg, onPriceChange, onToggleService, onShowLibrary }: PackageEditorProps) {
+function PackageEditor({ package: pkg, onPriceChange, onToggleService, onShowLibrary, getPriceFeedback }: PackageEditorProps) {
   const includedServices = pkg.includedServices.map(id => getServiceById(id)).filter(Boolean) as Service[];
 
   return (
@@ -540,6 +590,20 @@ function PackageEditor({ package: pkg, onPriceChange, onToggleService, onShowLib
                   min="1"
                 />
               </div>
+              {pkg.price > 0 && getPriceFeedback && (() => {
+                const feedback = getPriceFeedback(pkg.price);
+                if (feedback) {
+                  return (
+                    <div className={`flex items-center gap-1 mt-2 text-xs ${
+                      feedback.type === 'good' ? 'text-emerald-600' : 'text-amber-600'
+                    }`}>
+                      {feedback.icon}
+                      <span>{feedback.message}</span>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
         </CardContent>
@@ -565,7 +629,7 @@ function PackageEditor({ package: pkg, onPriceChange, onToggleService, onShowLib
             <div className="text-center py-8 text-slate-500">
               <Package className="h-12 w-12 mx-auto mb-4 text-slate-300" />
               <p>No services added yet</p>
-              <p className="text-sm">Click &quot;Add Services&quot; to get started</p>
+              <p className="text-sm">Click &ldquo;Add Services&rdquo; to get started</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
