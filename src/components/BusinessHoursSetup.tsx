@@ -124,7 +124,7 @@ export function BusinessHoursSetup({ initialData, onDataChange }: BusinessHoursS
       specialDays: []
     };
     onDataChange(data);
-  }, [schedule, timezone, lunchBreak, onDataChange]);
+  }, [schedule, timezone, lunchBreak]);
 
   const toggleDayOpen = (dayIndex: number) => {
     const newSchedule = [...schedule];
