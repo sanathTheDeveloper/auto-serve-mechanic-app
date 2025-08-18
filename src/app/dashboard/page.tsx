@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Home,
   Calendar,
@@ -20,6 +21,13 @@ import {
   Users,
   Car,
   DollarSign,
+  Phone,
+  Eye,
+  FileText,
+  CheckCircle,
+  AlertCircle,
+  Timer,
+  MapPin,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -58,7 +66,7 @@ const quickStats = [
     color: "from-blue-400 to-blue-500",
   },
   {
-    label: "This Week",
+    label: "Weekly Customers",
     value: "24",
     icon: Users,
     change: "+3 today",
@@ -66,6 +74,85 @@ const quickStats = [
     color: "from-slate-600 to-slate-700",
   },
 ];
+
+// Enhanced booking data with more realistic details
+const todaysBookings = [
+  {
+    id: "bk-001",
+    customer: "John Smith",
+    service: "Full Logbook Service",
+    vehicle: "2021 Toyota Camry",
+    timeStart: "9:00 AM",
+    timeEnd: "11:30 AM",
+    duration: "2h 30min",
+    bookingStatus: "confirmed",
+    paymentStatus: "deposit-paid",
+    bay: "Bay 2",
+    estimatedCompletion: "11:30 AM",
+    phone: "(03) 9876 5432",
+    priority: "normal",
+  },
+  {
+    id: "bk-002",
+    customer: "Sarah Johnson",
+    service: "Brake Inspection & Service",
+    vehicle: "2020 Honda Civic",
+    timeStart: "11:45 AM",
+    timeEnd: "1:15 PM",
+    duration: "1h 30min",
+    bookingStatus: "pending",
+    paymentStatus: "unpaid",
+    bay: "Bay 1",
+    estimatedCompletion: "1:15 PM",
+    phone: "(03) 9654 3210",
+    priority: "urgent",
+  },
+  {
+    id: "bk-003",
+    customer: "Mike Wilson",
+    service: "Tire Rotation & Balance",
+    vehicle: "2019 Ford Focus",
+    timeStart: "2:00 PM",
+    timeEnd: "3:00 PM",
+    duration: "1h",
+    bookingStatus: "confirmed",
+    paymentStatus: "paid-full",
+    bay: "Bay 3",
+    estimatedCompletion: "3:00 PM",
+    phone: "(03) 9321 6547",
+    priority: "normal",
+  },
+  {
+    id: "bk-004",
+    customer: "Emma Davis",
+    service: "Basic Service",
+    vehicle: "2018 Mazda CX-5",
+    timeStart: "3:30 PM",
+    timeEnd: "4:30 PM",
+    duration: "1h",
+    bookingStatus: "completed",
+    paymentStatus: "paid-full",
+    bay: "Bay 1",
+    estimatedCompletion: "4:30 PM",
+    phone: "(03) 9789 1234",
+    priority: "normal",
+  },
+];
+
+// Status configuration with brand-aligned colors
+const statusConfig = {
+  bookingStatus: {
+    confirmed: { label: "Confirmed", className: "bg-blue-100 text-blue-800" },
+    pending: { label: "Pending Confirmation", className: "bg-amber-100 text-amber-800" },
+    cancelled: { label: "Cancelled", className: "bg-red-100 text-red-800" },
+    completed: { label: "Completed", className: "bg-green-100 text-green-800" },
+  },
+  paymentStatus: {
+    "deposit-paid": { label: "Deposit Paid", className: "bg-blue-100 text-blue-800" },
+    "paid-full": { label: "Paid in Full", className: "bg-green-100 text-green-800" },
+    unpaid: { label: "Unpaid", className: "bg-red-100 text-red-800" },
+  },
+};
 
 export default function DashboardSPA() {
   const router = useRouter();
@@ -102,6 +189,113 @@ export default function DashboardSPA() {
   const handleSignOut = () => {
     signOut();
     router.push('/');
+  };
+
+  const handleContactCustomer = (phone: string) => {
+    window.open(`tel:${phone}`, '_self');
+  };
+
+  const handleViewDetails = (bookingId: string) => {
+    // Navigate to booking details page
+    console.log(`Viewing details for booking: ${bookingId}`);
+  };
+
+  const handlePrepareInvoice = (bookingId: string, customerName: string) => {
+    // Navigate to invoice preparation
+    console.log(`Preparing invoice for booking: ${bookingId}, customer: ${customerName}`);
+  };
+
+  const renderBookingCard = (booking: typeof todaysBookings[0]) => {
+    const bookingStatusConfig = statusConfig.bookingStatus[booking.bookingStatus as keyof typeof statusConfig.bookingStatus];
+    const paymentStatusConfig = statusConfig.paymentStatus[booking.paymentStatus as keyof typeof statusConfig.paymentStatus];
+
+    return (
+      <Card key={booking.id} className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50 hover:shadow-xl transition-all duration-300 group">
+        <CardContent className="p-6">
+          {/* Header with Time and Priority */}
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-blue-500" />
+                <span className="font-semibold text-slate-800">
+                  {booking.timeStart} - {booking.timeEnd}
+                </span>
+              </div>
+              {booking.priority === "urgent" && (
+                <AlertCircle className="h-4 w-4 text-amber-500" />
+              )}
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-slate-500">{booking.bay}</p>
+              <p className="text-xs text-slate-500">{booking.duration}</p>
+            </div>
+          </div>
+
+          {/* Primary Details */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <h3 className="text-lg font-semibold text-slate-800">{booking.customer}</h3>
+            </div>
+            <div className="flex items-center gap-2 mb-1">
+              <Car className="h-4 w-4 text-slate-500" />
+              <span className="text-sm text-slate-600">{booking.vehicle}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Wrench className="h-4 w-4 text-slate-500" />
+              <span className="text-sm font-medium text-slate-700">{booking.service}</span>
+            </div>
+          </div>
+
+          {/* Status Indicators */}
+          <div className="flex items-center gap-2 mb-4">
+            <Badge className={bookingStatusConfig.className}>
+              {bookingStatusConfig.label}
+            </Badge>
+            <Badge className={paymentStatusConfig.className}>
+              {paymentStatusConfig.label}
+            </Badge>
+          </div>
+
+          {/* Estimated Completion */}
+          <div className="flex items-center gap-2 mb-4 p-2 bg-blue-50/50 rounded-lg">
+            <Timer className="h-4 w-4 text-blue-500" />
+            <span className="text-sm text-blue-700">
+              Expected completion: {booking.estimatedCompletion}
+            </span>
+          </div>
+
+          {/* Quick Action Buttons */}
+          <div className="flex items-center gap-2 pt-4 border-t border-slate-200">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleContactCustomer(booking.phone)}
+              className="flex-1 border-blue-200 text-blue-600 hover:bg-blue-50"
+            >
+              <Phone className="h-4 w-4 mr-2" />
+              Contact
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleViewDetails(booking.id)}
+              className="flex-1 border-slate-200 text-slate-600 hover:bg-slate-50"
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              Details
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => handlePrepareInvoice(booking.id, booking.customer)}
+              className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+            >
+              <FileText className="h-4 w-4 mr-2" />
+              Invoice
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
   };
 
   const renderMainContent = () => {
@@ -147,16 +341,17 @@ export default function DashboardSPA() {
             </div>
 
             <div className="grid lg:grid-cols-3 gap-6">
-              {/* Today's Schedule */}
+              {/* Today's Schedule - Enhanced with Actionable Cards */}
               <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50 lg:col-span-2">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-6">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-800">
+                      <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                        <Calendar className="h-5 w-5 text-blue-500" />
                         Today&apos;s Schedule
-                      </h3>
-                      <p className="text-sm text-slate-600">
-                        Upcoming bookings and services
+                      </CardTitle>
+                      <p className="text-sm text-slate-600 mt-1">
+                        {todaysBookings.length} bookings scheduled • {todaysBookings.filter(b => b.priority === 'urgent').length} urgent
                       </p>
                     </div>
                     <Button
@@ -168,84 +363,44 @@ export default function DashboardSPA() {
                       View Calendar
                     </Button>
                   </div>
+                </CardHeader>
+                <CardContent className="p-6 pt-0">
+                  <div className="space-y-4">
+                    {todaysBookings.map((booking) => renderBookingCard(booking))}
+                  </div>
 
-                  <div className="space-y-3">
-                    {[
-                      {
-                        customer: "John Smith",
-                        service: "Basic Service",
-                        vehicle: "2019 Toyota Camry",
-                        time: "10:30 AM",
-                        duration: "45min",
-                        status: "in-progress",
-                        bay: "Bay 2",
-                      },
-                      {
-                        customer: "Sarah Johnson",
-                        service: "Brake Inspection",
-                        vehicle: "2021 Honda Civic",
-                        time: "11:15 AM",
-                        duration: "30min",
-                        status: "confirmed",
-                        bay: "Bay 1",
-                      },
-                      {
-                        customer: "Mike Wilson",
-                        service: "Tire Rotation",
-                        vehicle: "2020 Ford Focus",
-                        time: "2:00 PM",
-                        duration: "20min",
-                        status: "pending",
-                        bay: "Bay 3",
-                      },
-                    ].map((booking, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50/30 to-orange-50/30 rounded-xl border border-blue-200/20 hover:shadow-md transition-all"
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <p className="font-semibold text-slate-800">
-                              {booking.customer}
-                            </p>
-                            <span
-                              className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                booking.status === "in-progress"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : booking.status === "confirmed"
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : "bg-amber-100 text-amber-700"
-                              }`}
-                            >
-                              {booking.status}
-                            </span>
-                          </div>
-                          <p className="text-sm text-slate-600 mb-1">
-                            {booking.service} • {booking.vehicle}
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            {booking.bay} • {booking.duration}
-                          </p>
+                  {/* Summary Footer */}
+                  <div className="mt-6 pt-4 border-t border-slate-200">
+                    <div className="flex items-center justify-between text-sm">
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span className="text-slate-600">
+                            {todaysBookings.filter(b => b.bookingStatus === 'completed').length} completed
+                          </span>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-semibold text-slate-700">
-                            {booking.time}
-                          </p>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="mt-2 h-7 text-xs"
-                          >
-                            View Details
-                          </Button>
+                        <div className="flex items-center gap-1">
+                          <Timer className="h-4 w-4 text-blue-500" />
+                          <span className="text-slate-600">
+                            {todaysBookings.filter(b => b.bookingStatus === 'confirmed').length} confirmed
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <AlertCircle className="h-4 w-4 text-amber-500" />
+                          <span className="text-slate-600">
+                            {todaysBookings.filter(b => b.bookingStatus === 'pending').length} pending
+                          </span>
                         </div>
                       </div>
-                    ))}
+                      <Button size="sm" variant="outline" className="text-xs">
+                        Export Schedule
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Quick Actions */}
+              {/* Quick Actions - Enhanced */}
               <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50">
                 <CardContent className="p-6">
                   <h3 className="text-lg font-semibold text-slate-800 mb-4">
@@ -260,7 +415,7 @@ export default function DashboardSPA() {
                       variant="outline"
                       className="w-full justify-start h-12 border-amber-200 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50"
                     >
-                      <DollarSign className="h-4 w-4 mr-3" />
+                      <FileText className="h-4 w-4 mr-3" />
                       Create Invoice
                     </Button>
                     <Button
@@ -280,26 +435,51 @@ export default function DashboardSPA() {
                   </div>
 
                   <div className="mt-6 pt-4 border-t border-slate-200">
-                    <h4 className="text-sm font-semibold text-slate-700 mb-3">
+                    <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
                       Service Capacity
                     </h4>
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs">
                         <span className="text-slate-600">Bay 1</span>
-                        <span className="text-emerald-600 font-medium">
+                        <Badge className="bg-green-100 text-green-800">
                           Available
-                        </span>
+                        </Badge>
                       </div>
                       <div className="flex justify-between text-xs">
                         <span className="text-slate-600">Bay 2</span>
-                        <span className="text-blue-600 font-medium">
+                        <Badge className="bg-blue-100 text-blue-800">
                           In Use
-                        </span>
+                        </Badge>
                       </div>
                       <div className="flex justify-between text-xs">
                         <span className="text-slate-600">Bay 3</span>
-                        <span className="text-amber-600 font-medium">
+                        <Badge className="bg-amber-100 text-amber-800">
                           Scheduled
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Revenue Summary */}
+                  <div className="mt-6 pt-4 border-t border-slate-200">
+                    <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Today&apos;s Performance
+                    </h4>
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">Revenue</span>
+                        <span className="font-semibold text-green-600">$1,250</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">Pending Invoices</span>
+                        <span className="font-semibold text-amber-600">$450</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-600">Services Completed</span>
+                        <span className="font-semibold text-blue-600">
+                          {todaysBookings.filter(b => b.bookingStatus === 'completed').length}
                         </span>
                       </div>
                     </div>
