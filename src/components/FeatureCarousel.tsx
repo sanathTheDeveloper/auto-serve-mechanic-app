@@ -21,29 +21,29 @@ export function FeatureCarousel({ children }: FeatureCarouselProps) {
   };
 
   return (
-    <div className="relative w-full max-w-6xl mx-auto">
-      {/* Navigation Arrows */}
+    <div className="relative w-full max-w-7xl mx-auto">
+      {/* Navigation Arrows - Tablet enhanced */}
       <Button
         variant="outline"
         size="icon"
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm border-blue-200/50 shadow-lg hover:bg-white hover:scale-110 transition-all"
+        className="absolute left-6 top-1/2 -translate-y-1/2 z-10 bg-white/95 backdrop-blur-sm border-blue-200/50 shadow-xl hover:bg-white hover:scale-110 hover:shadow-2xl transition-all duration-300 w-14 h-14 rounded-2xl"
         onClick={prevSlide}
       >
-        <ChevronLeft className="h-6 w-6 text-slate-700" />
+        <ChevronLeft className="h-7 w-7 text-slate-700" />
       </Button>
 
       <Button
         variant="outline"
         size="icon"
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 backdrop-blur-sm border-blue-200/50 shadow-lg hover:bg-white hover:scale-110 transition-all"
+        className="absolute right-6 top-1/2 -translate-y-1/2 z-10 bg-white/95 backdrop-blur-sm border-blue-200/50 shadow-xl hover:bg-white hover:scale-110 hover:shadow-2xl transition-all duration-300 w-14 h-14 rounded-2xl"
         onClick={nextSlide}
       >
-        <ChevronRight className="h-6 w-6 text-slate-700" />
+        <ChevronRight className="h-7 w-7 text-slate-700" />
       </Button>
 
-      {/* Cards Container */}
-      <div className="overflow-hidden px-16">
-        <div className="relative h-72 flex items-center justify-center">
+      {/* Cards Container - Tablet enhanced */}
+      <div className="overflow-hidden px-20">
+        <div className="relative h-96 flex items-center justify-center">
           {children.map((child, index) => {
             const position = (index - currentIndex + totalCards) % totalCards;
             let zIndex = totalCards - position;
@@ -83,7 +83,7 @@ export function FeatureCarousel({ children }: FeatureCarouselProps) {
                 style={{
                   transform: `translateX(${translateX}px) scale(${scale})`,
                   zIndex,
-                  opacity
+                  opacity,
                 }}
               >
                 {child}
@@ -93,15 +93,15 @@ export function FeatureCarousel({ children }: FeatureCarouselProps) {
         </div>
       </div>
 
-      {/* Dots Indicator */}
-      <div className="flex justify-center mt-6 gap-3">
+      {/* Dots Indicator - Tablet enhanced */}
+      <div className="flex justify-center mt-10 gap-4">
         {Array.from({ length: totalCards }).map((_, index) => (
           <button
             key={index}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+            className={`w-4 h-4 rounded-full transition-all duration-300 ${
               index === currentIndex
-                ? "bg-blue-500 shadow-md scale-125" 
-                : "bg-slate-300 hover:bg-slate-400"
+                ? "bg-gradient-to-r from-blue-500 to-amber-500 shadow-lg scale-125"
+                : "bg-slate-300 hover:bg-slate-400 hover:scale-110"
             }`}
             onClick={() => setCurrentIndex(index)}
           />

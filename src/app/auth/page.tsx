@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Eye,
   EyeOff,
@@ -16,11 +16,11 @@ import {
   Clock,
   CheckCircle,
   ArrowLeft,
-  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import Image from "next/image";
 
 type AuthMode = "login" | "signup";
 
@@ -38,13 +38,13 @@ function AuthPageContent() {
     firstName: "",
     lastName: "",
     phone: "",
-    shopName: ""
+    shopName: "",
   });
 
   // Set initial mode based on URL parameter
   useEffect(() => {
-    const urlMode = searchParams.get('mode');
-    if (urlMode === 'signup' || urlMode === 'login') {
+    const urlMode = searchParams.get("mode");
+    if (urlMode === "signup" || urlMode === "login") {
       setMode(urlMode as AuthMode);
     }
   }, [searchParams]);
@@ -59,57 +59,64 @@ function AuthPageContent() {
       firstName: "",
       lastName: "",
       phone: "",
-      shopName: ""
+      shopName: "",
     });
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleGoogleAuth = async () => {
     try {
-      const user = await socialAuth('google');
+      const user = await socialAuth("google");
       // For new users (sign-up), redirect to shop profile setup
       // For existing users (sign-in), redirect to dashboard
       if (user.isNewUser || !user.hasCompletedProfile) {
-        router.push('/shop-profile');
+        router.push("/shop-profile");
       } else {
-        router.push('/dashboard');
+        router.push("/dashboard");
       }
     } catch (error) {
-      console.error('Google auth failed:', error);
+      console.error("Google auth failed:", error);
     }
   };
 
   const handleFacebookAuth = async () => {
     try {
-      const user = await socialAuth('facebook');
+      const user = await socialAuth("facebook");
       // For new users (sign-up), redirect to shop profile setup
       // For existing users (sign-in), redirect to dashboard
       if (user.isNewUser || !user.hasCompletedProfile) {
-        router.push('/shop-profile');
+        router.push("/shop-profile");
       } else {
-        router.push('/dashboard');
+        router.push("/dashboard");
       }
     } catch (error) {
-      console.error('Facebook auth failed:', error);
+      console.error("Facebook auth failed:", error);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       if (mode === "signup") {
         // Validate required fields for signup
-        if (!formData.email || !formData.password || !formData.firstName || !formData.lastName || !formData.phone || !formData.shopName) {
-          alert('Please fill in all required fields');
+        if (
+          !formData.email ||
+          !formData.password ||
+          !formData.firstName ||
+          !formData.lastName ||
+          !formData.phone ||
+          !formData.shopName
+        ) {
+          alert("Please fill in all required fields");
           return;
         }
-        
+
         if (formData.password !== formData.confirmPassword) {
-          alert('Passwords do not match');
+          alert("Passwords do not match");
           return;
         }
 
@@ -119,86 +126,94 @@ function AuthPageContent() {
           firstName: formData.firstName,
           lastName: formData.lastName,
           phone: formData.phone,
-          shopName: formData.shopName
+          shopName: formData.shopName,
         });
 
         // After successful sign-up, redirect to shop profile setup
-        router.push('/shop-profile');
+        router.push("/shop-profile");
       } else {
         // Login
         if (!formData.email || !formData.password) {
-          alert('Please enter your email and password');
+          alert("Please enter your email and password");
           return;
         }
 
         const user = await signIn(formData.email);
-        
+
         // For existing users, check if they need to complete profile setup
         if (!user.hasCompletedProfile) {
-          router.push('/shop-profile');
+          router.push("/shop-profile");
         } else {
-          router.push('/dashboard');
+          router.push("/dashboard");
         }
       }
     } catch (error) {
-      console.error('Authentication failed:', error);
-      alert('Authentication failed. Please try again.');
+      console.error("Authentication failed:", error);
+      alert("Authentication failed. Please try again.");
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-amber-100">
-      {/* Header with Back Button */}
-      <header className="px-6 py-6">
+      {/* Background decorative elements - consistent with landing page */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-20 -left-20 w-40 h-40 bg-gradient-to-br from-blue-200/30 to-blue-300/20 rounded-full blur-3xl"></div>
+        <div className="absolute -top-10 -right-20 w-32 h-32 bg-gradient-to-br from-amber-200/30 to-orange-300/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-gradient-to-br from-blue-100/40 to-sky-200/30 rounded-full blur-2xl"></div>
+      </div>
+
+      {/* Header with Back Button - compact styling */}
+      <header className="px-6 py-4 relative z-10">
         <div className="max-w-6xl mx-auto">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors"
+            className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors font-medium"
           >
             <ArrowLeft className="h-5 w-5" />
-            <span className="font-medium">Back to Welcome</span>
+            <span>Back to Welcome</span>
           </Link>
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="flex items-center justify-center px-6 py-8">
-        <div className="w-full max-w-md">
-          {/* Brand Header */}
+      {/* Main Content - tablet optimized */}
+      <div className="flex items-center justify-center px-8 py-8 relative z-10">
+        <div className="w-full max-w-2xl">
+          {/* Brand Header - tablet optimized */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/90 backdrop-blur-sm rounded-2xl border border-blue-200/50 shadow-lg mb-6">
-              <Sparkles className="w-5 h-5 text-amber-500" />
-              <span className="text-base font-semibold text-slate-700">
-                Auto Serve
-              </span>
+            {/* Logo - Enhanced for tablet */}
+            <div className="flex items-center justify-center mb-6">
+              <div className="w-20 h-20 flex items-center justify-center">
+                <Image
+                  src="/logo.png"
+                  alt="Auto Serve Logo"
+                  width={80}
+                  height={80}
+                  className="object-contain drop-shadow-xl"
+                  priority
+                />
+              </div>
             </div>
 
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-800 to-amber-700 bg-clip-text text-transparent mb-2">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-800 to-amber-700 bg-clip-text text-transparent mb-3">
               {mode === "login" ? "Welcome Back" : "Create Your Account"}
-            </h1>
+            </h2>
 
-            <p className="text-slate-600">
+            <p className="text-lg text-slate-600 max-w-md mx-auto leading-relaxed">
               {mode === "login"
                 ? "Sign in to access your auto shop dashboard"
                 : "Join thousands of auto shop owners managing their business digitally"}
             </p>
           </div>
 
-          {/* Auth Card */}
-          <Card className="bg-white/90 backdrop-blur-sm shadow-2xl border border-blue-200/50">
-            <CardHeader className="pb-6">
-              <CardTitle className="text-xl font-semibold text-slate-800 text-center">
-                {mode === "login" ? "Sign In" : "Get Started"}
-              </CardTitle>
-            </CardHeader>
-
+          {/* Auth Card - tablet enhanced */}
+          <Card className="bg-white/95 backdrop-blur-sm shadow-2xl border border-blue-200/50 rounded-3xl p-8">
             <CardContent className="space-y-6">
-              {/* Social Auth Buttons */}
-              <div className="space-y-3">
+              {/* Social Auth Buttons - tablet enhanced */}
+              <div className="space-y-4">
                 <Button
                   onClick={handleGoogleAuth}
                   variant="outline"
-                  className="w-full h-12 bg-white hover:bg-gray-50 border border-slate-200 text-slate-700 font-medium rounded-xl transition-all duration-200 hover:shadow-md"
+                  className="w-full h-14 bg-white hover:bg-slate-50 border-2 border-slate-200 hover:border-slate-300 text-slate-700 font-medium text-lg rounded-2xl transition-all duration-300 hover:shadow-lg"
                 >
                   <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                     <path
@@ -223,8 +238,7 @@ function AuthPageContent() {
 
                 <Button
                   onClick={handleFacebookAuth}
-                  variant="outline"
-                  className="w-full h-12 bg-[#1877F2] hover:bg-[#166FE5] border-[#1877F2] text-white font-medium rounded-xl transition-all duration-200 hover:shadow-md"
+                  className="w-full h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium text-lg rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   <svg
                     className="w-5 h-5 mr-3"
@@ -237,19 +251,19 @@ function AuthPageContent() {
                 </Button>
               </div>
 
-              {/* Divider */}
+              {/* Divider - brand-consistent styling */}
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-slate-200" />
                 </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-slate-500">
+                <div className="relative flex justify-center text-base">
+                  <span className="px-4 bg-white/95 text-slate-500 font-medium">
                     or continue with email
                   </span>
                 </div>
               </div>
 
-              {/* Auth Form */}
+              {/* Auth Form - tablet enhanced */}
               <form onSubmit={handleSubmit} className="space-y-4">
                 {mode === "signup" && (
                   <>
@@ -257,7 +271,7 @@ function AuthPageContent() {
                       <div>
                         <label
                           htmlFor="firstName"
-                          className="block text-sm font-medium text-slate-700 mb-2"
+                          className="block text-base font-medium text-slate-700 mb-2"
                         >
                           First Name
                         </label>
@@ -268,8 +282,10 @@ function AuthPageContent() {
                             type="text"
                             placeholder="John"
                             value={formData.firstName}
-                            onChange={(e) => handleInputChange("firstName", e.target.value)}
-                            className="pl-10 h-11 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                            onChange={(e) =>
+                              handleInputChange("firstName", e.target.value)
+                            }
+                            className="pl-12 h-12 rounded-2xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-300 text-base"
                             required
                           />
                         </div>
@@ -277,19 +293,21 @@ function AuthPageContent() {
                       <div>
                         <label
                           htmlFor="lastName"
-                          className="block text-sm font-medium text-slate-700 mb-2"
+                          className="block text-base font-medium text-slate-700 mb-2"
                         >
                           Last Name
                         </label>
                         <div className="relative">
-                          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                          <User className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                           <Input
                             id="lastName"
                             type="text"
                             placeholder="Doe"
                             value={formData.lastName}
-                            onChange={(e) => handleInputChange("lastName", e.target.value)}
-                            className="pl-10 h-11 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                            onChange={(e) =>
+                              handleInputChange("lastName", e.target.value)
+                            }
+                            className="pl-12 h-12 rounded-2xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-300 text-base"
                             required
                           />
                         </div>
@@ -299,19 +317,21 @@ function AuthPageContent() {
                     <div>
                       <label
                         htmlFor="phone"
-                        className="block text-sm font-medium text-slate-700 mb-2"
+                        className="block text-base font-medium text-slate-700 mb-2"
                       >
                         Phone Number
                       </label>
                       <div className="relative">
-                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                         <Input
                           id="phone"
                           type="tel"
                           placeholder="+1 (555) 123-4567"
                           value={formData.phone}
-                          onChange={(e) => handleInputChange("phone", e.target.value)}
-                          className="pl-10 h-11 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                          onChange={(e) =>
+                            handleInputChange("phone", e.target.value)
+                          }
+                          className="pl-12 h-12 rounded-2xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-300 text-base"
                           required
                         />
                       </div>
@@ -320,19 +340,21 @@ function AuthPageContent() {
                     <div>
                       <label
                         htmlFor="shopName"
-                        className="block text-sm font-medium text-slate-700 mb-2"
+                        className="block text-base font-medium text-slate-700 mb-2"
                       >
                         Shop Name
                       </label>
                       <div className="relative">
-                        <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Building2 className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                         <Input
                           id="shopName"
                           type="text"
                           placeholder="John's Auto Service"
                           value={formData.shopName}
-                          onChange={(e) => handleInputChange("shopName", e.target.value)}
-                          className="pl-10 h-11 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                          onChange={(e) =>
+                            handleInputChange("shopName", e.target.value)
+                          }
+                          className="pl-12 h-12 rounded-2xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-300 text-base"
                           required
                         />
                       </div>
@@ -343,19 +365,21 @@ function AuthPageContent() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-slate-700 mb-2"
+                    className="block text-base font-medium text-slate-700 mb-2"
                   >
                     Email Address
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                     <Input
                       id="email"
                       type="email"
                       placeholder="john@example.com"
                       value={formData.email}
-                      onChange={(e) => handleInputChange("email", e.target.value)}
-                      className="pl-10 h-11 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      onChange={(e) =>
+                        handleInputChange("email", e.target.value)
+                      }
+                      className="pl-12 h-12 rounded-2xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-300 text-base"
                       required
                     />
                   </div>
@@ -364,25 +388,27 @@ function AuthPageContent() {
                 <div>
                   <label
                     htmlFor="password"
-                    className="block text-sm font-medium text-slate-700 mb-2"
+                    className="block text-base font-medium text-slate-700 mb-2"
                   >
                     Password
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                     <Input
                       id="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
                       value={formData.password}
-                      onChange={(e) => handleInputChange("password", e.target.value)}
-                      className="pl-10 pr-10 h-11 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                      onChange={(e) =>
+                        handleInputChange("password", e.target.value)
+                      }
+                      className="pl-12 pr-12 h-12 rounded-2xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-300 text-base"
                       required
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                     >
                       {showPassword ? (
                         <EyeOff className="h-4 w-4" />
@@ -397,19 +423,21 @@ function AuthPageContent() {
                   <div>
                     <label
                       htmlFor="confirmPassword"
-                      className="block text-sm font-medium text-slate-700 mb-2"
+                      className="block text-base font-medium text-slate-700 mb-2"
                     >
                       Confirm Password
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                      <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                       <Input
                         id="confirmPassword"
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder="••••••••"
                         value={formData.confirmPassword}
-                        onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                        className="pl-10 pr-10 h-11 rounded-xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                        onChange={(e) =>
+                          handleInputChange("confirmPassword", e.target.value)
+                        }
+                        className="pl-12 pr-12 h-12 rounded-2xl border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 transition-all duration-300 text-base"
                         required
                       />
                       <button
@@ -417,7 +445,7 @@ function AuthPageContent() {
                         onClick={() =>
                           setShowConfirmPassword(!showConfirmPassword)
                         }
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                       >
                         {showConfirmPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -442,31 +470,36 @@ function AuthPageContent() {
                     </label>
                     <Link
                       href="/forgot-password"
-                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                      className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
                     >
                       Forgot password?
                     </Link>
                   </div>
                 )}
 
+                {/* Submit Button - brand-consistent styling */}
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full h-14 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold text-lg rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? "Please wait..." : mode === "login" ? "Sign In" : "Create Account"}
+                  {isLoading
+                    ? "Please wait..."
+                    : mode === "login"
+                    ? "Sign In"
+                    : "Create Account"}
                 </Button>
               </form>
 
-              {/* Mode Toggle */}
+              {/* Mode Toggle - tablet enhanced */}
               <div className="text-center pt-4">
-                <p className="text-slate-600">
+                <p className="text-base text-slate-600">
                   {mode === "login"
                     ? "Don't have an account?"
                     : "Already have an account?"}
                   <button
                     onClick={handleToggleMode}
-                    className="ml-1 text-blue-600 hover:text-blue-700 font-medium"
+                    className="ml-2 text-blue-600 hover:text-blue-700 font-medium transition-colors"
                   >
                     {mode === "login" ? "Sign up" : "Sign in"}
                   </button>
@@ -475,28 +508,28 @@ function AuthPageContent() {
             </CardContent>
           </Card>
 
-          {/* Benefits Section for Signup */}
+          {/* Benefits Section for Signup - tablet enhanced */}
           {mode === "signup" && (
             <div className="mt-8 text-center">
-              <h3 className="text-lg font-semibold text-slate-800 mb-4">
+              <h3 className="text-xl font-semibold text-slate-800 mb-4">
                 Why Choose Auto Serve?
               </h3>
-              <div className="grid grid-cols-3 gap-4 text-sm text-slate-600">
+              <div className="grid grid-cols-3 gap-6 text-sm text-slate-600">
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mb-2">
-                    <CheckCircle className="h-4 w-4 text-blue-600" />
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mb-2 shadow-md">
+                    <CheckCircle className="h-4 w-4 text-white" />
                   </div>
                   <span>Free Setup</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center mb-2">
-                    <Clock className="h-4 w-4 text-amber-600" />
+                  <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center mb-2 shadow-md">
+                    <Clock className="h-4 w-4 text-white" />
                   </div>
                   <span>24/7 Access</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mb-2">
-                    <MapPin className="h-4 w-4 text-green-600" />
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center mb-2 shadow-md">
+                    <MapPin className="h-4 w-4 text-white" />
                   </div>
                   <span>Mobile Ready</span>
                 </div>
@@ -505,32 +538,22 @@ function AuthPageContent() {
           )}
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="px-6 py-8 border-t border-blue-200/50 bg-white/50 backdrop-blur-sm mt-auto">
-        <div className="max-w-6xl mx-auto text-center">
-          <div className="text-2xl font-bold bg-gradient-to-r from-blue-800 to-amber-700 bg-clip-text text-transparent mb-2">
-            Auto Serve
-          </div>
-          <p className="text-slate-600 text-sm">
-            Modern automotive service management platform
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }
 
 export default function AuthPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-amber-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-600">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-amber-100 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-slate-600">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <AuthPageContent />
     </Suspense>
   );
