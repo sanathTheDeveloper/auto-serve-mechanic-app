@@ -64,6 +64,7 @@ import {
 import { useRouter } from "next/navigation";
 import { ServiceMenuManager } from "@/components/ServiceMenuManager";
 import { InvoicingPage } from "@/components/invoicing/InvoicingPage";
+import { ReviewsManagement } from "@/components/reviews/ReviewsManagement";
 import { mockJobs, statusConfig, getJobsByStage } from "@/data/jobs";
 import { Job, JobFilter } from "@/types/booking";
 import { Logo } from "@/components/Logo";
@@ -1465,32 +1466,7 @@ export default function DashboardSPA() {
         return <InvoicingPage />;
 
       case "reviews":
-        return (
-          <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
-                    Review Response Tools
-                  </h2>
-                  <p className="text-slate-600 mt-1">
-                    Manage reputation with public review responses and customer
-                    feedback
-                  </p>
-                </div>
-                <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600">
-                  <Star className="h-4 w-4 mr-2" />
-                  Respond to Reviews
-                </Button>
-              </div>
-              <div className="text-center py-12 text-slate-500">
-                <Star className="h-16 w-16 mx-auto mb-4 text-slate-300" />
-                <p>Reply to public reviews to manage reputation</p>
-                <p className="text-sm">Increase trust and quality control</p>
-              </div>
-            </CardContent>
-          </Card>
-        );
+        return <ReviewsManagement />;
 
       case "settings":
         return (
@@ -1716,24 +1692,24 @@ export default function DashboardSPA() {
                   : currentPage === "services"
                   ? "Service Menu Customization"
                   : currentPage === "bookings"
-                  ? "Bookings"
+                  ? "Booking Management"
                   : currentPage === "payments"
                   ? "Invoicing & Payments"
                   : currentPage === "reviews"
-                  ? "Reviews"
+                  ? "Review Management"
                   : "Shop Profile"}
               </h1>
               <p className="text-slate-600 text-sm mt-1">
                 {currentPage === "overview"
                   ? "Welcome back! Here's what's happening at your shop today."
                   : currentPage === "bookings"
-                  ? "Manage appointments and track service scheduling."
+                  ? "Streamline appointments and optimize your service workflow for maximum efficiency."
                   : currentPage === "services"
                   ? "Configure your service menu and pricing structure."
                   : currentPage === "payments"
                   ? "Track revenue and manage invoicing for your business."
                   : currentPage === "reviews"
-                  ? "Respond to customer reviews and manage your reputation."
+                  ? "Build trust and strengthen customer relationships through thoughtful review engagement."
                   : "Update your shop profile and business settings."}
               </p>
             </div>
