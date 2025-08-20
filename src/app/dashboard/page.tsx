@@ -65,6 +65,7 @@ import { useRouter } from "next/navigation";
 import { ServiceMenuManager } from "@/components/ServiceMenuManager";
 import { mockJobs, statusConfig, getJobsByStage } from "@/data/jobs";
 import { Job, JobFilter } from "@/types/booking";
+import { Logo } from "@/components/Logo";
 
 // Calculate dynamic badge counts
 const getNavigationItems = () => {
@@ -1556,7 +1557,7 @@ export default function DashboardSPA() {
       {/* Sidebar */}
       <div
         className={`${
-          isCollapsed ? "w-20" : "w-80"
+          isCollapsed ? "w-20" : "w-64"
         } transition-all duration-300 bg-white/95 backdrop-blur-sm border-r border-blue-200/50 shadow-xl flex flex-col relative`}
       >
         {/* Collapse/Expand Button - Positioned on the edge border */}
@@ -1576,33 +1577,26 @@ export default function DashboardSPA() {
         {/* Header */}
         <div
           className={`${
-            isCollapsed ? "p-4" : "p-6"
+            isCollapsed ? "p-3" : "px-4 py-3"
           } border-b border-blue-200/50`}
         >
           <div
-            className={`flex items-center ${
-              isCollapsed ? "justify-center" : "gap-3"
-            } mb-4`}
+            className={`${
+              isCollapsed ? "flex items-center justify-center" : "flex items-center gap-3"
+            }`}
           >
             <div
-              className={`${
-                isCollapsed ? "w-12 h-12" : "w-10 h-10"
-              } bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg cursor-pointer hover:from-blue-600 hover:to-blue-700 transition-all duration-200 hover:scale-105`}
+              className="cursor-pointer hover:scale-105 transition-all duration-200"
               onClick={() => router.push("/")}
             >
-              <Wrench
-                className={`${isCollapsed ? "h-6 w-6" : "h-5 w-5"} text-white`}
-              />
+              <Logo size="sm" />
             </div>
             {!isCollapsed && (
               <div
-                className="flex-1 cursor-pointer"
+                className="cursor-pointer"
                 onClick={() => router.push("/")}
               >
-                <h1 className="text-xl font-bold bg-gradient-to-r from-blue-800 to-amber-700 bg-clip-text text-transparent hover:from-blue-700 hover:to-amber-600 transition-all">
-                  Auto Serve
-                </h1>
-                <p className="text-sm text-slate-600">Professional Dashboard</p>
+                <p className="text-sm text-slate-600 font-medium">The Mechanic App</p>
               </div>
             )}
           </div>
