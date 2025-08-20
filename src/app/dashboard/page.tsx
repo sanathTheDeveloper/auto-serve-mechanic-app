@@ -63,6 +63,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ServiceMenuManager } from "@/components/ServiceMenuManager";
+import { InvoicingPage } from "@/components/invoicing/InvoicingPage";
 import { mockJobs, statusConfig, getJobsByStage } from "@/data/jobs";
 import { Job, JobFilter } from "@/types/booking";
 import { Logo } from "@/components/Logo";
@@ -1461,33 +1462,7 @@ export default function DashboardSPA() {
         return <ServiceMenuManager />;
 
       case "payments":
-        return (
-          <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
-                    Invoicing & Payments
-                  </h2>
-                  <p className="text-slate-600 mt-1">
-                    Track revenue, commission deductions, and pending payments
-                  </p>
-                </div>
-                <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
-                  <DollarSign className="h-4 w-4 mr-2" />
-                  Create Invoice
-                </Button>
-              </div>
-              <div className="text-center py-12 text-slate-500">
-                <CreditCard className="h-16 w-16 mx-auto mb-4 text-slate-300" />
-                <p>Simple dashboard for tracking incoming revenue</p>
-                <p className="text-sm">
-                  Manage invoicing and payment processing
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        );
+        return <InvoicingPage />;
 
       case "reviews":
         return (

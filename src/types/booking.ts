@@ -25,6 +25,11 @@ export interface Quote {
   sentAt?: string;
 }
 
+export interface AdditionalService {
+  name: string;
+  price: number;
+}
+
 export interface Job {
   id: string;
   customer: string;
@@ -52,6 +57,9 @@ export interface Job {
   finalPrice?: number;
   createdAt: string;
   updatedAt: string;
+  // Extended properties for compatibility
+  registration?: string;
+  additionalServices?: AdditionalService[];
 }
 
 // Legacy booking interface for backward compatibility

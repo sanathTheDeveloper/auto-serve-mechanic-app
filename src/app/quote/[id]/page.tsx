@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   ArrowLeft,
   FileText,
@@ -14,6 +17,8 @@ import {
   Phone,
   Send,
   Trash2,
+  AlertTriangle,
+  X,
 } from "lucide-react";
 import { mockJobs } from "@/data/jobs";
 import { Job } from "@/types/booking";
@@ -28,6 +33,11 @@ export default function QuotePage() {
   const [partsItems, setPartsItems] = useState([
     { id: 1, description: "", partNumber: "", quantity: 1, cost: 0, total: 0 },
   ]);
+  
+  // Decline job dialog state
+  const [declineDialogOpen, setDeclineDialogOpen] = useState(false);
+  const [declineReason, setDeclineReason] = useState("");
+  const [declineNotes, setDeclineNotes] = useState("");
 
   useEffect(() => {
     const jobId = params.id as string;
@@ -57,10 +67,34 @@ export default function QuotePage() {
   // };
 
   const handleDeclineJob = () => {
-    if (confirm("Are you sure you want to decline this job?")) {
-      console.log(`Declining job: ${job?.id}`);
-      router.push("/dashboard");
+    setDeclineDialogOpen(true);
+  };
+
+  const handleConfirmDecline = () => {
+    if (!declineReason) {
+      alert("Please select a reason for declining this job.");
+      return;
     }
+    
+    console.log(`Declining job: ${job?.id}`, {
+      reason: declineReason,
+      notes: declineNotes,
+      customer: job?.customer,
+      vehicle: job?.vehicle,
+      service: job?.service
+    });
+    
+    // Here you would typically make an API call to update the job status
+    // and send notification to customer
+    
+    setDeclineDialogOpen(false);
+    router.push("/dashboard");
+  };
+
+  const handleCancelDecline = () => {
+    setDeclineDialogOpen(false);
+    setDeclineReason("");
+    setDeclineNotes("");
   };
 
   const handleDownloadQuote = () => {
@@ -212,37 +246,39 @@ Valid for 7 days
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-orange-50 to-amber-100">
-      <div className="max-w-6xl mx-auto p-6">
-        {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-4 mb-4">
+      {/* Header */}
+      <header className="px-6 py-4 bg-white/95 backdrop-blur-sm border-b border-blue-200/50 shadow-sm">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4">
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
-              onClick={() => router.push("/dashboard")}
-              className="border-slate-200 text-slate-600 hover:bg-slate-50"
+              onClick={() => router.back()}
+              className="text-slate-600 hover:text-slate-800"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
+              Back
             </Button>
-          </div>
-
-          <div className="flex items-center gap-3 mb-2">
-            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg">
-              <FileText className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
-                {job.stage === "quote-requested"
-                  ? "Create Quote"
-                  : "Update Quote"}
-              </h1>
-              <p className="text-slate-600">
-                {job.customer} • {job.vehicle}
-              </p>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+                <FileText className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
+                  {job.stage === "quote-requested"
+                    ? "Create Quote"
+                    : "Update Quote"}
+                </h1>
+                <p className="text-sm text-slate-600">
+                  {job.customer} • {job.vehicle}
+                </p>
+              </div>
             </div>
           </div>
         </div>
+      </header>
+
+      <div className="max-w-6xl mx-auto p-6">
 
         <div className="space-y-6">
           {/* Customer Info Card */}
@@ -619,6 +655,97 @@ Valid for 7 days
             </CardContent>
           </Card>
         </div>
+        
+        {/* Decline Job Dialog */}
+        <Dialog open={declineDialogOpen} onOpenChange={setDeclineDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl">
+                  <AlertTriangle className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-800">Decline Job</h2>
+                  <p className="text-sm text-slate-500 font-normal">
+                    {job?.customer} • {job?.vehicle}
+                  </p>
+                </div>
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-6 pt-4">
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-medium text-amber-800 mb-1">Important Notice</h3>
+                    <p className="text-sm text-amber-700">
+                      Declining this job will notify the customer and remove it from your active queue. 
+                      Please provide a clear reason to maintain good customer relations.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Reason for Declining *
+                </label>
+                <Select value={declineReason} onValueChange={setDeclineReason}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a reason..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fully-booked">Workshop Fully Booked</SelectItem>
+                    <SelectItem value="outside-expertise">Outside Our Expertise</SelectItem>
+                    <SelectItem value="parts-unavailable">Required Parts Unavailable</SelectItem>
+                    <SelectItem value="scheduling-conflict">Scheduling Conflict</SelectItem>
+                    <SelectItem value="customer-location">Customer Location Too Far</SelectItem>
+                    <SelectItem value="safety-concerns">Safety Concerns</SelectItem>
+                    <SelectItem value="insufficient-information">Insufficient Job Information</SelectItem>
+                    <SelectItem value="other">Other (Specify Below)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Additional Notes <span className="text-slate-500">(Optional)</span>
+                </label>
+                <Textarea
+                  placeholder="Provide additional context or suggest alternative solutions..."
+                  value={declineNotes}
+                  onChange={(e) => setDeclineNotes(e.target.value)}
+                  rows={4}
+                  className="resize-none"
+                />
+                <p className="text-xs text-slate-500 mt-2">
+                  This message will be included in the notification sent to the customer.
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-slate-200">
+                <Button
+                  variant="outline"
+                  onClick={handleCancelDecline}
+                  className="flex-1"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirmDecline}
+                  className="flex-1 bg-red-600 hover:bg-red-700"
+                  disabled={!declineReason}
+                >
+                  <AlertTriangle className="h-4 w-4 mr-2" />
+                  Confirm Decline
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
