@@ -20,7 +20,7 @@ import {
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import Image from "next/image";
+import { Logo } from "@/components/Logo";
 
 type AuthMode = "login" | "signup";
 
@@ -182,16 +182,7 @@ function AuthPageContent() {
           <div className="text-center mb-8">
             {/* Logo - Enhanced for tablet */}
             <div className="flex items-center justify-center mb-6">
-              <div className="w-20 h-20 flex items-center justify-center">
-                <Image
-                  src="/logo.png"
-                  alt="Auto Serve Logo"
-                  width={80}
-                  height={80}
-                  className="object-contain drop-shadow-xl"
-                  priority
-                />
-              </div>
+              <Logo size="xl" />
             </div>
 
             <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-800 to-amber-700 bg-clip-text text-transparent mb-3">

@@ -3,9 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, FileText, MapPin, Wrench, LogIn } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { FeatureCard } from "@/components/FeatureCard";
 import { FeatureCarousel } from "@/components/FeatureCarousel";
+import { Logo } from "@/components/Logo";
 
 export default function CustomerIntroPage() {
   const features = [
@@ -53,19 +53,10 @@ export default function CustomerIntroPage() {
         <div className="max-w-6xl mx-auto relative z-10">
           {/* Logo Section - Compact for single screen */}
           <div className="mb-8">
-            {/* Logo - Compact for single screen */}
+            {/* Logo - Enhanced for tablet and web app */}
             <div className="mb-6">
               <div className="flex items-center justify-center mb-4">
-                <div className="w-24 h-24 flex items-center justify-center">
-                  <Image
-                    src="/logo.png"
-                    alt="Auto Serve Logo"
-                    width={96}
-                    height={96}
-                    className="object-contain drop-shadow-xl"
-                    priority
-                  />
-                </div>
+                <Logo size="xl" />
               </div>
 
               {/* Enhanced Tagline - Compact for single screen */}
