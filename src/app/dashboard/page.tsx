@@ -67,7 +67,7 @@ import { InvoicingPage } from "@/components/invoicing/InvoicingPage";
 import { ReviewsManagement } from "@/components/reviews/ReviewsManagement";
 import { mockJobs, statusConfig, getJobsByStage } from "@/data/jobs";
 import { Job, JobFilter } from "@/types/booking";
-import { Logo } from "@/components/Logo";
+import Image from "next/image";
 
 // Calculate dynamic badge counts
 const getNavigationItems = () => {
@@ -1533,21 +1533,29 @@ export default function DashboardSPA() {
         >
           <div
             className={`${
-              isCollapsed ? "flex items-center justify-center" : "flex items-center gap-3"
+              isCollapsed
+                ? "flex items-center justify-center"
+                : "flex items-center gap-3"
             }`}
           >
             <div
               className="cursor-pointer hover:scale-105 transition-all duration-200"
               onClick={() => router.push("/")}
             >
-              <Logo size="sm" />
+              <Image
+                src="/sideNavBar-logo.png"
+                alt="Auto Serve Sidebar Logo"
+                width={48}
+                height={48}
+                className="object-contain drop-shadow-lg w-12 h-12"
+                priority
+              />
             </div>
             {!isCollapsed && (
-              <div
-                className="cursor-pointer"
-                onClick={() => router.push("/")}
-              >
-                <p className="text-sm text-slate-600 font-medium">The Mechanic App</p>
+              <div className="cursor-pointer" onClick={() => router.push("/")}>
+                <p className="text-sm text-slate-600 font-medium">
+                  The Mechanic App
+                </p>
               </div>
             )}
           </div>
