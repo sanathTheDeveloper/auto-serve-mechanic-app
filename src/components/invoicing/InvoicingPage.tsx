@@ -37,52 +37,57 @@ export function InvoicingPage({}: InvoicingPageProps) {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [recentInvoices, setRecentInvoices] = useState<Invoice[]>([]);
 
-  const handleCreateInvoice = useCallback((invoice: Invoice) => {
-    // Add new transaction when invoice is sent
-    const newTransaction: Transaction = {
-      id: `txn-${Date.now()}`,
-      invoiceId: invoice.id,
-      invoiceNumber: invoice.invoiceNumber,
-      date: invoice.sentAt || new Date().toISOString(),
-      customerName: invoice.customerName,
-      grossAmount: invoice.total,
-      appFee: invoice.total * 0.15, // 15% app fee
-      netPayout: invoice.total * 0.85,
-      status: "in_escrow",
-    };
+  const handleCreateInvoice = useCallback(
+    (invoice: Invoice) => {
+      // Add new transaction when invoice is sent
+      const newTransaction: Transaction = {
+        id: `txn-${Date.now()}`,
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        date: invoice.sentAt || new Date().toISOString(),
+        customerName: invoice.customerName,
+        grossAmount: invoice.total,
+        appFee: invoice.total * 0.15, // 15% app fee
+        netPayout: invoice.total * 0.85,
+        status: "in_escrow",
+      };
 
-    setTransactions([newTransaction, ...transactions]);
-    setRecentInvoices([invoice, ...recentInvoices]);
-    setIsInvoiceDialogOpen(false);
-  }, [transactions, recentInvoices]);
+      setTransactions([newTransaction, ...transactions]);
+      setRecentInvoices([invoice, ...recentInvoices]);
+      setIsInvoiceDialogOpen(false);
+    },
+    [transactions, recentInvoices]
+  );
 
-  const handleSaveDraft = useCallback((invoice: Invoice) => {
-    setRecentInvoices([invoice, ...recentInvoices]);
-    setIsInvoiceDialogOpen(false);
-  }, [recentInvoices]);
+  const handleSaveDraft = useCallback(
+    (invoice: Invoice) => {
+      setRecentInvoices([invoice, ...recentInvoices]);
+      setIsInvoiceDialogOpen(false);
+    },
+    [recentInvoices]
+  );
 
   // Handle new invoice or draft creation from localStorage
   useEffect(() => {
-    const newInvoice = localStorage.getItem('newInvoice');
-    const draftInvoice = localStorage.getItem('draftInvoice');
-    
+    const newInvoice = localStorage.getItem("newInvoice");
+    const draftInvoice = localStorage.getItem("draftInvoice");
+
     if (newInvoice) {
       const invoice = JSON.parse(newInvoice);
       handleCreateInvoice(invoice);
-      localStorage.removeItem('newInvoice');
+      localStorage.removeItem("newInvoice");
     }
-    
+
     if (draftInvoice) {
       const invoice = JSON.parse(draftInvoice);
       handleSaveDraft(invoice);
-      localStorage.removeItem('draftInvoice');
+      localStorage.removeItem("draftInvoice");
     }
   }, [handleCreateInvoice, handleSaveDraft]);
 
   const handleExportCSV = (filteredTransactions: Transaction[]) => {
     exportTransactionsToCSV(filteredTransactions);
   };
-
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -126,18 +131,14 @@ export function InvoicingPage({}: InvoicingPageProps) {
           </Badge>
         );
       default:
-        return (
-          <Badge variant="secondary">
-            {status}
-          </Badge>
-        );
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-AU', {
-      style: 'currency',
-      currency: 'AUD',
+    return new Intl.NumberFormat("en-AU", {
+      style: "currency",
+      currency: "AUD",
       minimumFractionDigits: 2,
     }).format(amount);
   };
@@ -163,7 +164,7 @@ export function InvoicingPage({}: InvoicingPageProps) {
               <div className="bg-green-50 border border-green-200 rounded-lg p-2.5">
                 <div className="text-center">
                   <div className="text-lg font-bold text-green-700">
-                    {transactions.filter(t => t.status === 'completed').length}
+                    {transactions.filter((t) => t.status === "paid_out").length}
                   </div>
                   <div className="text-xs text-green-600">Paid</div>
                 </div>
@@ -171,7 +172,10 @@ export function InvoicingPage({}: InvoicingPageProps) {
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5">
                 <div className="text-center">
                   <div className="text-lg font-bold text-amber-700">
-                    {transactions.filter(t => t.status === 'in_escrow').length}
+                    {
+                      transactions.filter((t) => t.status === "in_escrow")
+                        .length
+                    }
                   </div>
                   <div className="text-xs text-amber-600">In Escrow</div>
                 </div>
@@ -180,18 +184,25 @@ export function InvoicingPage({}: InvoicingPageProps) {
 
             {/* Recent Payment Activity */}
             <div className="border-t border-slate-200 pt-3">
-              <h4 className="text-xs font-semibold text-slate-700 mb-2">Recent Activity</h4>
+              <h4 className="text-xs font-semibold text-slate-700 mb-2">
+                Recent Activity
+              </h4>
               <div className="space-y-2">
-                {transactions.slice(0, 3).map(transaction => (
-                  <div key={transaction.id} className="flex items-center justify-between text-xs">
-                    <span className="text-slate-600 truncate">{transaction.customerName}</span>
+                {transactions.slice(0, 3).map((transaction) => (
+                  <div
+                    key={transaction.id}
+                    className="flex items-center justify-between text-xs"
+                  >
+                    <span className="text-slate-600 truncate">
+                      {transaction.customerName}
+                    </span>
                     <div className="flex items-center gap-1">
                       <span className="font-medium text-slate-800">
                         {formatCurrency(transaction.grossAmount)}
                       </span>
-                      {transaction.status === 'completed' ? (
+                      {transaction.status === "paid_out" ? (
                         <CheckCircle className="h-3 w-3 text-green-500" />
-                      ) : transaction.status === 'in_escrow' ? (
+                      ) : transaction.status === "in_escrow" ? (
                         <Clock className="h-3 w-3 text-amber-500" />
                       ) : (
                         <AlertCircle className="h-3 w-3 text-red-500" />
@@ -205,7 +216,7 @@ export function InvoicingPage({}: InvoicingPageProps) {
             {/* Actions */}
             <div className="border-t border-slate-200 pt-3 space-y-2">
               <Button
-                onClick={() => router.push('/create-invoice')}
+                onClick={() => router.push("/create-invoice")}
                 className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 h-8 text-xs"
               >
                 <FileText className="h-3 w-3 mr-2" />
@@ -233,7 +244,11 @@ export function InvoicingPage({}: InvoicingPageProps) {
                 Recent Invoices
               </CardTitle>
               {recentInvoices.length > 0 && (
-                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 text-xs lg:text-sm">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-blue-600 hover:text-blue-700 text-xs lg:text-sm"
+                >
                   View All
                 </Button>
               )}
@@ -273,7 +288,11 @@ export function InvoicingPage({}: InvoicingPageProps) {
                       <p className="font-semibold text-slate-800">
                         {formatCurrency(invoice.total)}
                       </p>
-                      <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                      >
                         <Eye className="h-3 w-3 mr-1" />
                         View
                       </Button>

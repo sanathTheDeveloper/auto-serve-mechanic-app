@@ -133,11 +133,10 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
 
   const updateNestedFormData = (path: string[], value: unknown) => {
     const newData = { ...formData };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let current: any = newData;
+    let current: Record<string, unknown> = newData;
 
     for (let i = 0; i < path.length - 1; i++) {
-      current = current[path[i]];
+      current = current[path[i]] as Record<string, unknown>;
     }
     current[path[path.length - 1]] = value;
 

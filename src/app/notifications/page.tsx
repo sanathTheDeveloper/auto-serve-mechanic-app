@@ -30,7 +30,6 @@ import {
   Trash2,
   User,
   Phone,
-  X,
 } from "lucide-react";
 
 // Notification types for mechanic workshop
