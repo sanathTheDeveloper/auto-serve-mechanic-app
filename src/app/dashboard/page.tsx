@@ -68,6 +68,7 @@ import { ReviewsManagement } from "@/components/reviews/ReviewsManagement";
 import { mockJobs, statusConfig, getJobsByStage } from "@/data/jobs";
 import { Job, JobFilter } from "@/types/booking";
 import { Logo } from "@/components/Logo";
+import { ShopProfileSettings } from "@/components/ShopProfileSettings";
 
 // Calculate dynamic badge counts
 const getNavigationItems = () => {
@@ -1469,34 +1470,7 @@ export default function DashboardSPA() {
         return <ReviewsManagement />;
 
       case "settings":
-        return (
-          <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
-                    Shop Profile Setup
-                  </h2>
-                  <p className="text-slate-600 mt-1">
-                    Services offered, pricing, business hours, capacity, and
-                    payment info
-                  </p>
-                </div>
-                <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
-              </div>
-              <div className="text-center py-12 text-slate-500">
-                <Settings className="h-16 w-16 mx-auto mb-4 text-slate-300" />
-                <p>Configure your shop profile and business settings</p>
-                <p className="text-sm">
-                  Manage hours, capacity, and service offerings
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        );
+        return <ShopProfileSettings />;
 
       default:
         return renderMainContent();
