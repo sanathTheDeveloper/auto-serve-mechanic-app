@@ -145,6 +145,7 @@ const getTodaysBookings = () => {
   return mockJobs.filter((job) => job.date === today);
 };
 
+
 export default function DashboardSPA() {
   const router = useRouter();
   const { user, isAuthenticated, signOut } = useAuth();
@@ -181,6 +182,9 @@ export default function DashboardSPA() {
     preferredTime: "",
     priority: "medium" as "low" | "medium" | "high"
   });
+
+  // Mock notification count for badge (in a real app, this would come from an API)
+  const unreadNotificationCount = 3;
 
   // Booking management computed values (must be before early returns)
   const filteredJobs = useMemo(() => {
@@ -983,6 +987,7 @@ ${newBookingForm.customerEmail ? `📧 Email confirmation sent to: ${newBookingF
       </div>
     );
   };
+
 
   const renderMainContent = () => {
     switch (currentPage) {
@@ -1847,10 +1852,19 @@ ${newBookingForm.customerEmail ? `📧 Email confirmation sent to: ${newBookingF
                 <Button
                   variant="outline"
                   size="sm"
-                  className="border-blue-200 text-slate-600 hover:bg-blue-50"
+                  className="border-blue-200 text-slate-600 hover:bg-blue-50 relative"
+                  onClick={() => router.push("/notifications")}
                 >
                   <Bell className="h-4 w-4 mr-2" />
                   Notifications
+                  {unreadNotificationCount > 0 && (
+                    <Badge 
+                      variant="destructive" 
+                      className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 hover:bg-red-600"
+                    >
+                      {unreadNotificationCount}
+                    </Badge>
+                  )}
                 </Button>
               )}
               {currentPage === "settings" && (
