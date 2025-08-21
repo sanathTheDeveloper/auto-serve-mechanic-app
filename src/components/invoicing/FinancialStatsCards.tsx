@@ -26,22 +26,22 @@ export function FinancialStatsCards({ financialData }: FinancialStatsCardsProps)
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-6 md:mb-8">
       {/* Funds in Escrow */}
       <Card className="bg-white/95 backdrop-blur-sm shadow-lg border border-blue-200/50 hover:shadow-xl transition-all duration-300">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 p-4 lg:p-6">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium text-slate-600">
+            <CardTitle className="text-xs lg:text-sm font-medium text-slate-600">
               Funds in Escrow
             </CardTitle>
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-              <DollarSign className="h-5 w-5 text-white" />
+            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg">
+              <DollarSign className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
             </div>
           </div>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent className="pt-0 p-4 lg:p-6">
           <div className="space-y-2">
-            <div className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
+            <div className="text-xl lg:text-3xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
               {formatCurrency(financialData.fundsInEscrow)}
             </div>
             <div className="flex items-center gap-2">
@@ -56,19 +56,19 @@ export function FinancialStatsCards({ financialData }: FinancialStatsCardsProps)
 
       {/* Pending Payouts */}
       <Card className="bg-white/95 backdrop-blur-sm shadow-lg border border-amber-200/50 hover:shadow-xl transition-all duration-300">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 p-4 lg:p-6">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium text-slate-600">
+            <CardTitle className="text-xs lg:text-sm font-medium text-slate-600">
               Pending Payouts
             </CardTitle>
-            <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-              <Clock className="h-5 w-5 text-white" />
+            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg">
+              <Clock className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
             </div>
           </div>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent className="pt-0 p-4 lg:p-6">
           <div className="space-y-2">
-            <div className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
+            <div className="text-xl lg:text-3xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
               {formatCurrency(financialData.pendingPayouts)}
             </div>
             <div className="flex items-center gap-2">
@@ -83,19 +83,19 @@ export function FinancialStatsCards({ financialData }: FinancialStatsCardsProps)
 
       {/* Last Payout */}
       <Card className="bg-white/95 backdrop-blur-sm shadow-lg border border-emerald-200/50 hover:shadow-xl transition-all duration-300">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 p-4 lg:p-6">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium text-slate-600">
+            <CardTitle className="text-xs lg:text-sm font-medium text-slate-600">
               Last Payout
             </CardTitle>
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg">
-              <TrendingUp className="h-5 w-5 text-white" />
+            <div className="w-8 h-8 lg:w-10 lg:h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg lg:rounded-xl flex items-center justify-center shadow-lg">
+              <TrendingUp className="h-4 w-4 lg:h-5 lg:w-5 text-white" />
             </div>
           </div>
         </CardHeader>
-        <CardContent className="pt-0">
+        <CardContent className="pt-0 p-4 lg:p-6">
           <div className="space-y-2">
-            <div className="text-3xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
+            <div className="text-xl lg:text-3xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
               {formatCurrency(financialData.lastPayout.amount)}
             </div>
             <div className="flex items-center gap-2">

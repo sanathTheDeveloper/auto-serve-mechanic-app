@@ -10,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   FileText,
-  Plus,
   TrendingUp,
   Clock,
   AlertCircle,
@@ -144,56 +143,103 @@ export function InvoicingPage({}: InvoicingPageProps) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {/* Financial Overview Cards */}
       <FinancialStatsCards financialData={financialData} />
 
-      {/* Quick Actions & Recent Invoices */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Quick Actions */}
+      {/* Payment Status & Recent Invoices */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+        {/* Payment Status Overview */}
         <Card className="bg-white/95 backdrop-blur-sm shadow-lg border border-blue-200/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Plus className="h-5 w-5 text-blue-500" />
-              Quick Actions
+          <CardHeader className="p-4 lg:p-5">
+            <CardTitle className="flex items-center gap-2 text-sm lg:text-base">
+              <CheckCircle className="h-4 w-4 text-blue-500" />
+              Payment Status
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <Button
-              onClick={() => router.push('/create-invoice')}
-              className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-            >
-              <FileText className="h-4 w-4 mr-2" />
-              Create New Invoice
-              <ExternalLink className="h-3 w-3 ml-2" />
-            </Button>
-            <Button
-              variant="outline"
-              className="w-full bg-white hover:bg-slate-50"
-              onClick={() => handleExportCSV(transactions)}
-            >
-              <TrendingUp className="h-4 w-4 mr-2" />
-              Export All Transactions
-            </Button>
+          <CardContent className="space-y-3 p-4 lg:p-5 pt-0">
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-2.5">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-green-700">
+                    {transactions.filter(t => t.status === 'completed').length}
+                  </div>
+                  <div className="text-xs text-green-600">Paid</div>
+                </div>
+              </div>
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-2.5">
+                <div className="text-center">
+                  <div className="text-lg font-bold text-amber-700">
+                    {transactions.filter(t => t.status === 'in_escrow').length}
+                  </div>
+                  <div className="text-xs text-amber-600">In Escrow</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Payment Activity */}
+            <div className="border-t border-slate-200 pt-3">
+              <h4 className="text-xs font-semibold text-slate-700 mb-2">Recent Activity</h4>
+              <div className="space-y-2">
+                {transactions.slice(0, 3).map(transaction => (
+                  <div key={transaction.id} className="flex items-center justify-between text-xs">
+                    <span className="text-slate-600 truncate">{transaction.customerName}</span>
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium text-slate-800">
+                        {formatCurrency(transaction.grossAmount)}
+                      </span>
+                      {transaction.status === 'completed' ? (
+                        <CheckCircle className="h-3 w-3 text-green-500" />
+                      ) : transaction.status === 'in_escrow' ? (
+                        <Clock className="h-3 w-3 text-amber-500" />
+                      ) : (
+                        <AlertCircle className="h-3 w-3 text-red-500" />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="border-t border-slate-200 pt-3 space-y-2">
+              <Button
+                onClick={() => router.push('/create-invoice')}
+                className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 h-8 text-xs"
+              >
+                <FileText className="h-3 w-3 mr-2" />
+                New Invoice
+                <ExternalLink className="h-3 w-3 ml-2" />
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full bg-white hover:bg-slate-50 h-8 text-xs"
+                onClick={() => handleExportCSV(transactions)}
+              >
+                <TrendingUp className="h-3 w-3 mr-2" />
+                Export Data
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
         {/* Recent Invoices */}
         <Card className="lg:col-span-2 bg-white/95 backdrop-blur-sm shadow-lg border border-slate-200/50">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-slate-600" />
+          <CardHeader className="p-4 lg:p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <CardTitle className="flex items-center gap-2 text-sm lg:text-base">
+                <FileText className="h-4 w-4 text-slate-600" />
                 Recent Invoices
               </CardTitle>
               {recentInvoices.length > 0 && (
-                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700">
+                <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 text-xs lg:text-sm">
                   View All
                 </Button>
               )}
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 lg:p-5 pt-0">
             {recentInvoices.length === 0 ? (
               <div className="text-center py-8 text-slate-500">
                 <FileText className="h-12 w-12 mx-auto mb-3 text-slate-300" />

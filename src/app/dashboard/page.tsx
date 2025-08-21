@@ -60,6 +60,7 @@ import {
   Mail,
   History,
   Info,
+  Hammer,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ServiceMenuManager } from "@/components/ServiceMenuManager";
@@ -517,26 +518,26 @@ export default function DashboardSPA() {
 
   // Render calendar content for booking management
   const renderCalendarContent = () => (
-    <div className="grid lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6">
       {/* Enhanced Calendar */}
       <Card className="bg-white/95 backdrop-blur-md shadow-xl border-0 rounded-2xl overflow-hidden lg:col-span-3">
-        <CardHeader className="bg-gradient-to-r from-blue-50/80 to-slate-50/80 border-b border-blue-100/50">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                <CalendarIcon className="h-5 w-5 text-white" />
+        <CardHeader className="bg-gradient-to-r from-blue-50/80 to-slate-50/80 border-b border-blue-100/50 p-4 md:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <CardTitle className="flex items-center gap-2 md:gap-3">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg md:rounded-xl flex items-center justify-center shadow-lg">
+                <CalendarIcon className="h-4 w-4 md:h-5 md:w-5 text-white" />
               </div>
-              <div>
-                <span className="text-lg font-semibold text-slate-800">
+              <div className="min-w-0">
+                <span className="text-base md:text-lg font-semibold text-slate-800 truncate">
                   Interactive Job Calendar
                 </span>
-                <p className="text-sm text-slate-500 font-normal">
+                <p className="text-xs md:text-sm text-slate-500 font-normal">
                   Manage your schedule
                 </p>
               </div>
             </CardTitle>
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-3 text-xs bg-white/60 rounded-xl px-3 py-2 border border-blue-100/50">
+              <div className="hidden sm:flex items-center gap-2 md:gap-3 text-xs bg-white/60 rounded-xl px-2 md:px-3 py-2 border border-blue-100/50">
                 <div className="flex items-center gap-1.5">
                   <div className="w-2.5 h-2.5 bg-gradient-to-br from-amber-400 to-amber-500 rounded-full shadow-sm"></div>
                   <span className="font-medium text-slate-700">Quotes</span>
@@ -559,7 +560,7 @@ export default function DashboardSPA() {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 md:p-6">
           <CalendarComponent
             mode="single"
             selected={selectedDate}
@@ -576,7 +577,7 @@ export default function DashboardSPA() {
                 }));
               }
             }}
-            className="rounded-md border-0 w-full"
+            className="rounded-md border-0 w-full text-sm md:text-base"
             components={{
               DayButton: ({ day, ...props }) => {
                 const dayString = format(day.date, "yyyy-MM-dd");
@@ -632,9 +633,9 @@ export default function DashboardSPA() {
 
           {/* Calendar Quick Stats */}
           <div className="mt-4 pt-4 border-t border-slate-200">
-            <div className="grid grid-cols-4 gap-3 text-center">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 text-center">
               <div className="p-2 bg-amber-50 rounded-lg">
-                <div className="text-lg font-bold text-amber-600">
+                <div className="text-base md:text-lg font-bold text-amber-600">
                   {Object.values(jobCountsByDate).reduce(
                     (sum, day) => sum + (day.byStage["quote-requested"] || 0),
                     0
@@ -643,7 +644,7 @@ export default function DashboardSPA() {
                 <div className="text-xs text-amber-700">New Quotes</div>
               </div>
               <div className="p-2 bg-blue-50 rounded-lg">
-                <div className="text-lg font-bold text-blue-600">
+                <div className="text-base md:text-lg font-bold text-blue-600">
                   {Object.values(jobCountsByDate).reduce(
                     (sum, day) => sum + (day.byStage["confirmed"] || 0),
                     0
@@ -652,7 +653,7 @@ export default function DashboardSPA() {
                 <div className="text-xs text-blue-700">Upcoming</div>
               </div>
               <div className="p-2 bg-purple-50 rounded-lg">
-                <div className="text-lg font-bold text-purple-600">
+                <div className="text-base md:text-lg font-bold text-purple-600">
                   {Object.values(jobCountsByDate).reduce(
                     (sum, day) => sum + (day.byStage["in-progress"] || 0),
                     0
@@ -661,7 +662,7 @@ export default function DashboardSPA() {
                 <div className="text-xs text-purple-700">In Progress</div>
               </div>
               <div className="p-2 bg-green-50 rounded-lg">
-                <div className="text-lg font-bold text-green-600">
+                <div className="text-base md:text-lg font-bold text-green-600">
                   {Object.values(jobCountsByDate).reduce(
                     (sum, day) => sum + (day.byStage["completed"] || 0),
                     0
@@ -676,18 +677,18 @@ export default function DashboardSPA() {
 
       {/* Selected Date Details */}
       <Card className="bg-white/95 backdrop-blur-md shadow-xl border-0 rounded-2xl overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-slate-50/80 to-blue-50/80 border-b border-slate-100/50">
-          <CardTitle className="text-base flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white text-sm font-bold">
+        <CardHeader className="bg-gradient-to-r from-slate-50/80 to-blue-50/80 border-b border-slate-100/50 p-4 md:p-6">
+          <CardTitle className="text-sm md:text-base flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg md:rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white text-xs md:text-sm font-bold">
                 {format(selectedDate, "d")}
               </span>
             </div>
-            <div>
-              <div className="font-semibold text-slate-800 text-lg">
+            <div className="min-w-0">
+              <div className="font-semibold text-slate-800 text-base md:text-lg truncate">
                 {format(selectedDate, "MMM d")}
               </div>
-              <div className="text-sm text-slate-500 font-normal">
+              <div className="text-xs md:text-sm text-slate-500 font-normal">
                 {format(selectedDate, "EEEE")}
               </div>
             </div>
@@ -697,8 +698,8 @@ export default function DashboardSPA() {
             {selectedDateJobs.length !== 1 ? "s" : ""} scheduled
           </p>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
+        <CardContent className="p-3 md:p-6">
+          <div className="space-y-2 md:space-y-3 max-h-96 overflow-y-auto">
             {selectedDateJobs.length === 0 ? (
               <div className="text-center py-8 text-slate-500">
                 <CalendarIcon className="h-12 w-12 mx-auto mb-3 text-slate-300" />
@@ -812,45 +813,45 @@ export default function DashboardSPA() {
     return (
       <div
         key={job.id}
-        className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 ${
+        className={`flex items-center justify-between p-2.5 rounded-lg border transition-all duration-200 ${
           isQuoteRequest
             ? "bg-amber-50/50 border-amber-200/50 hover:bg-amber-100/50"
             : "bg-slate-50/50 border-slate-200/50 hover:bg-slate-100/50"
         }`}
       >
-        <div className="flex items-center gap-3">
-          <div className="text-center min-w-[60px]">
+        <div className="flex items-center gap-2.5">
+          <div className="text-center min-w-[50px]">
             {isQuoteRequest ? (
               <>
-                <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full mx-auto mb-1">
-                  <FileText className="h-4 w-4 text-white" />
+                <div className="flex items-center justify-center w-6 h-6 bg-gradient-to-r from-amber-400 to-amber-500 rounded-full mx-auto mb-0.5">
+                  <FileText className="h-3 w-3 text-white" />
                 </div>
                 <div className="text-xs font-medium text-amber-600">QUOTE</div>
               </>
             ) : (
               <>
-                <div className="text-sm font-semibold text-slate-800">
+                <div className="text-xs font-semibold text-slate-800">
                   {job.timeStart}
                 </div>
                 <div className="text-xs text-slate-500">{job.bay}</div>
               </>
             )}
           </div>
-          <div className="border-l border-slate-300 pl-3">
-            <div className="font-medium text-slate-800">{job.customer}</div>
-            <div className="text-sm text-slate-600">{job.vehicle}</div>
-            <div className="text-xs text-slate-500">{job.service}</div>
+          <div className="border-l border-slate-300 pl-2.5 min-w-0 flex-1">
+            <div className="font-medium text-slate-800 text-sm truncate">{job.customer}</div>
+            <div className="text-xs text-slate-600 truncate">{job.vehicle}</div>
+            <div className="text-xs text-slate-500 truncate">{job.service}</div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 flex-shrink-0">
           <Badge
-            className={`${stageConfig.className} text-xs`}
+            className={`${stageConfig.className} text-xs px-1.5 py-0.5`}
             variant="secondary"
           >
             {stageConfig.label}
           </Badge>
           {job.priority === "urgent" && (
-            <AlertCircle className="h-4 w-4 text-amber-500" />
+            <AlertCircle className="h-3 w-3 text-amber-500" />
           )}
         </div>
       </div>
@@ -863,18 +864,18 @@ export default function DashboardSPA() {
         return (
           <div className="space-y-4">
             {/* Key Metrics */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
               {quickStats.map((stat, index) => (
                 <Card
                   key={index}
                   className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50 hover:shadow-xl transition-all duration-300"
                 >
-                  <CardContent className="p-4">
+                  <CardContent className="p-3 md:p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div
-                        className={`w-10 h-10 bg-gradient-to-br ${stat.color} rounded-lg flex items-center justify-center shadow-md`}
+                        className={`w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br ${stat.color} rounded-lg flex items-center justify-center shadow-md`}
                       >
-                        <stat.icon className="h-5 w-5 text-white" />
+                        <stat.icon className="h-4 w-4 md:h-5 md:w-5 text-white" />
                       </div>
                       <span
                         className={`text-xs px-2 py-1 rounded-full font-medium ${
@@ -887,7 +888,7 @@ export default function DashboardSPA() {
                       </span>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-slate-800 mb-1">
+                      <p className="text-lg md:text-2xl font-bold text-slate-800 mb-1">
                         {stat.value}
                       </p>
                       <p className="text-xs text-slate-600 font-medium">
@@ -899,17 +900,17 @@ export default function DashboardSPA() {
               ))}
             </div>
 
-            <div className="grid lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
               {/* Today's Schedule - Enhanced with Actionable Cards */}
-              <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50 lg:col-span-2">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
-                        <Calendar className="h-5 w-5 text-blue-500" />
-                        Today&apos;s Schedule
+              <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50 xl:col-span-3">
+                <CardHeader className="p-4 md:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-base md:text-lg font-semibold text-slate-800 flex items-center gap-2">
+                        <Calendar className="h-4 w-4 md:h-5 md:w-5 text-blue-500 flex-shrink-0" />
+                        <span className="truncate">Today&apos;s Schedule</span>
                       </CardTitle>
-                      <p className="text-sm text-slate-600 mt-1">
+                      <p className="text-xs md:text-sm text-slate-600 mt-1">
                         {getTodaysBookings().length} bookings scheduled •{" "}
                         {
                           getTodaysBookings().filter(
@@ -923,21 +924,22 @@ export default function DashboardSPA() {
                       variant="outline"
                       size="sm"
                       onClick={() => setCurrentPage("bookings")}
-                      className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                      className="text-blue-600 border-blue-200 hover:bg-blue-50 text-xs md:text-sm"
                     >
-                      <Calendar className="h-4 w-4 mr-2" />
-                      View Calendar
+                      <Calendar className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                      <span className="hidden sm:inline">View Calendar</span>
+                      <span className="sm:hidden">Calendar</span>
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="p-6 pt-0">
+                <CardContent className="p-4 md:p-6 pt-0">
                   {getTodaysBookings().length === 0 ? (
                     <div className="text-center py-8 text-slate-500">
                       <Calendar className="h-12 w-12 mx-auto mb-3 text-slate-300" />
                       <p>No bookings scheduled for today</p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {/* Quote Requests */}
                       {getTodaysBookings().filter(
                         (job) =>
@@ -945,13 +947,13 @@ export default function DashboardSPA() {
                           job.stage === "quote-sent"
                       ).length > 0 && (
                         <div>
-                          <div className="flex items-center gap-2 mb-3">
-                            <FileText className="h-4 w-4 text-amber-500" />
-                            <h4 className="text-sm font-medium text-amber-700">
+                          <div className="flex items-center gap-2 mb-2">
+                            <FileText className="h-3 w-3 text-amber-500" />
+                            <h4 className="text-xs font-medium text-amber-700">
                               Quote Requests
                             </h4>
                           </div>
-                          <div className="space-y-2">
+                          <div className="space-y-1.5">
                             {getTodaysBookings()
                               .filter(
                                 (job) =>
@@ -970,13 +972,13 @@ export default function DashboardSPA() {
                           job.stage !== "quote-sent"
                       ).length > 0 && (
                         <div>
-                          <div className="flex items-center gap-2 mb-3">
-                            <Clock className="h-4 w-4 text-blue-500" />
-                            <h4 className="text-sm font-medium text-slate-700">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Clock className="h-3 w-3 text-blue-500" />
+                            <h4 className="text-xs font-medium text-slate-700">
                               Scheduled Appointments
                             </h4>
                           </div>
-                          <div className="space-y-2">
+                          <div className="space-y-1.5">
                             {getTodaysBookings()
                               .filter(
                                 (job) =>
@@ -1019,97 +1021,111 @@ export default function DashboardSPA() {
                 </CardContent>
               </Card>
 
-              {/* Quick Actions - Enhanced */}
+              {/* Workshop Status - Mechanic Focused */}
               <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50 h-fit">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-slate-800 mb-4">
-                    Quick Actions
+                <CardContent className="p-4 xl:p-5">
+                  <h3 className="text-sm xl:text-base font-semibold text-slate-800 mb-3 flex items-center gap-2">
+                    <Wrench className="h-4 w-4 text-blue-500" />
+                    Workshop Status
                   </h3>
-                  <div className="space-y-3">
-                    <Button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white justify-start h-12">
-                      <Plus className="h-4 w-4 mr-3" />
-                      New Booking
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start h-12 border-amber-200 hover:bg-gradient-to-r hover:from-amber-50 hover:to-orange-50"
-                    >
-                      <FileText className="h-4 w-4 mr-3" />
-                      Create Invoice
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start h-12 border-blue-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-sky-50"
-                    >
-                      <Car className="h-4 w-4 mr-3" />
-                      Add Vehicle Profile
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start h-12 border-slate-200 hover:bg-slate-50"
-                    >
-                      <Settings className="h-4 w-4 mr-3" />
-                      Shop Settings
-                    </Button>
+                  
+                  {/* Active Jobs Progress */}
+                  <div className="space-y-3 mb-4">
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-medium text-purple-700">Jobs In Progress</span>
+                        <Badge className="bg-purple-100 text-purple-800 text-xs">
+                          {getTodaysBookings().filter(j => j.stage === "in-progress").length} Active
+                        </Badge>
+                      </div>
+                      {getTodaysBookings().filter(j => j.stage === "in-progress").length > 0 ? (
+                        <div className="space-y-1.5">
+                          {getTodaysBookings()
+                            .filter(j => j.stage === "in-progress")
+                            .slice(0, 2)
+                            .map(job => (
+                              <div key={job.id} className="flex items-center justify-between text-xs">
+                                <span className="text-purple-700 truncate">{job.customer} - {job.vehicle}</span>
+                                <span className="text-purple-600 font-medium">{job.bay}</span>
+                              </div>
+                            ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-purple-600">No jobs currently in progress</p>
+                      )}
+                    </div>
+
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-medium text-amber-700">Quotes Pending</span>
+                        <Badge className="bg-amber-100 text-amber-800 text-xs">
+                          {getTodaysBookings().filter(j => j.stage === "quote-requested" || j.stage === "quote-sent").length} Jobs
+                        </Badge>
+                      </div>
+                      {getTodaysBookings().filter(j => j.stage === "quote-requested" || j.stage === "quote-sent").length > 0 ? (
+                        <div className="space-y-1.5">
+                          {getTodaysBookings()
+                            .filter(j => j.stage === "quote-requested" || j.stage === "quote-sent")
+                            .slice(0, 2)
+                            .map(job => (
+                              <div key={job.id} className="flex items-center justify-between text-xs">
+                                <span className="text-amber-700 truncate">{job.customer}</span>
+                                <span className="text-amber-600 font-medium">{job.stage === "quote-sent" ? "Sent" : "Pending"}</span>
+                              </div>
+                            ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-amber-600">No pending quotes</p>
+                      )}
+                    </div>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-slate-200">
-                    <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      Service Capacity
+                  {/* Service Bay Status */}
+                  <div className="border-t border-slate-200 pt-3">
+                    <h4 className="text-xs xl:text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      Service Bays
                     </h4>
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-1 gap-1.5">
                       <div className="flex justify-between text-xs">
-                        <span className="text-slate-600">Bay 1</span>
-                        <Badge className="bg-green-100 text-green-800">
+                        <span className="text-slate-600">Bay 1 - Diagnostics</span>
+                        <Badge className="bg-green-100 text-green-800 text-xs px-1.5 py-0.5">
                           Available
                         </Badge>
                       </div>
                       <div className="flex justify-between text-xs">
-                        <span className="text-slate-600">Bay 2</span>
-                        <Badge className="bg-blue-100 text-blue-800">
-                          In Use
+                        <span className="text-slate-600">Bay 2 - General Service</span>
+                        <Badge className="bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5">
+                          Occupied
                         </Badge>
                       </div>
                       <div className="flex justify-between text-xs">
-                        <span className="text-slate-600">Bay 3</span>
-                        <Badge className="bg-amber-100 text-amber-800">
-                          Scheduled
+                        <span className="text-slate-600">Bay 3 - Heavy Repair</span>
+                        <Badge className="bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5">
+                          Reserved
                         </Badge>
                       </div>
                     </div>
                   </div>
 
-                  {/* Revenue Summary */}
-                  <div className="mt-6 pt-4 border-t border-slate-200">
-                    <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                      <DollarSign className="h-4 w-4" />
-                      Today&apos;s Performance
+                  {/* Tools & Equipment Status */}
+                  <div className="mt-4 pt-3 border-t border-slate-200">
+                    <h4 className="text-xs xl:text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1">
+                      <Hammer className="h-3 w-3" />
+                      Equipment Status
                     </h4>
-                    <div className="space-y-2 text-xs">
+                    <div className="space-y-1.5 text-xs">
                       <div className="flex justify-between">
-                        <span className="text-slate-600">Revenue</span>
-                        <span className="font-semibold text-green-600">
-                          $1,250
-                        </span>
+                        <span className="text-slate-600">Vehicle Lift #1</span>
+                        <span className="font-medium text-green-600">Operational</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-600">Pending Invoices</span>
-                        <span className="font-semibold text-amber-600">
-                          $450
-                        </span>
+                        <span className="text-slate-600">Diagnostic Scanner</span>
+                        <span className="font-medium text-green-600">Available</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-slate-600">
-                          Services Completed
-                        </span>
-                        <span className="font-semibold text-blue-600">
-                          {
-                            getTodaysBookings().filter(
-                              (j) => j.stage === "completed"
-                            ).length
-                          }
-                        </span>
+                        <span className="text-slate-600">Alignment Machine</span>
+                        <span className="font-medium text-amber-600">In Use</span>
                       </div>
                     </div>
                   </div>
@@ -1121,11 +1137,11 @@ export default function DashboardSPA() {
 
       case "bookings":
         return (
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {/* View Mode Toggle and Filters */}
             <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
+              <CardContent className="p-4 md:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
                   {/* View Mode Toggle */}
                   <div className="flex items-center gap-2">
                     <Button
@@ -1174,9 +1190,9 @@ export default function DashboardSPA() {
                 </div>
 
                 {/* Filters Row */}
-                <div className="flex items-center gap-4 flex-wrap">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
                   {/* Search */}
-                  <div className="flex-1 min-w-64">
+                  <div className="flex-1 min-w-0 sm:min-w-64">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
                       <Input
@@ -1188,7 +1204,7 @@ export default function DashboardSPA() {
                             searchTerm: e.target.value,
                           }))
                         }
-                        className="pl-10"
+                        className="pl-10 text-sm"
                       />
                     </div>
                   </div>
@@ -1283,13 +1299,14 @@ export default function DashboardSPA() {
                 onValueChange={setActiveStageTab}
                 className="w-full"
               >
-                <TabsList className="inline-flex h-12 items-center justify-center rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-lg p-1 mb-6 w-full">
+                <TabsList className="inline-flex h-10 md:h-12 items-center justify-center rounded-lg md:rounded-xl bg-white/80 backdrop-blur-sm border border-slate-200/50 shadow-lg p-1 mb-4 md:mb-6 w-full overflow-x-auto">
                   <TabsTrigger
                     value="quotes"
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-orange-600 hover:bg-orange-50/50 flex-1 gap-2"
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-2 md:px-4 py-2 text-xs md:text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-orange-600 hover:bg-orange-50/50 flex-1 gap-1 md:gap-2"
                   >
-                    <FileText className="h-4 w-4" />
-                    <span>New Quotes</span>
+                    <FileText className="h-3 w-3 md:h-4 md:w-4" />
+                    <span className="hidden sm:inline">New Quotes</span>
+                    <span className="sm:hidden">Quotes</span>
                     {tabCounts.quotes > 0 && (
                       <span className="ml-1 rounded-full bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-800 data-[state=active]:bg-white/20 data-[state=active]:text-white">
                         {tabCounts.quotes}
@@ -1298,9 +1315,9 @@ export default function DashboardSPA() {
                   </TabsTrigger>
                   <TabsTrigger
                     value="upcoming"
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 flex-1 gap-2"
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-2 md:px-4 py-2 text-xs md:text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50/50 flex-1 gap-1 md:gap-2"
                   >
-                    <Clock className="h-4 w-4" />
+                    <Clock className="h-3 w-3 md:h-4 md:w-4" />
                     <span>Upcoming</span>
                     {tabCounts.upcoming > 0 && (
                       <span className="ml-1 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 data-[state=active]:bg-white/20 data-[state=active]:text-white">
@@ -1310,10 +1327,11 @@ export default function DashboardSPA() {
                   </TabsTrigger>
                   <TabsTrigger
                     value="progress"
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-purple-600 hover:bg-purple-50/50 flex-1 gap-2"
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-2 md:px-4 py-2 text-xs md:text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-purple-600 hover:bg-purple-50/50 flex-1 gap-1 md:gap-2"
                   >
-                    <PlayCircle className="h-4 w-4" />
-                    <span>In Progress</span>
+                    <PlayCircle className="h-3 w-3 md:h-4 md:w-4" />
+                    <span className="hidden sm:inline">In Progress</span>
+                    <span className="sm:hidden">Progress</span>
                     {tabCounts.progress > 0 && (
                       <span className="ml-1 rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-800 data-[state=active]:bg-white/20 data-[state=active]:text-white">
                         {tabCounts.progress}
@@ -1322,9 +1340,9 @@ export default function DashboardSPA() {
                   </TabsTrigger>
                   <TabsTrigger
                     value="completed"
-                    className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-green-600 hover:bg-green-50/50 flex-1 gap-2"
+                    className="inline-flex items-center justify-center whitespace-nowrap rounded-lg px-2 md:px-4 py-2 text-xs md:text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-sm text-slate-600 hover:text-green-600 hover:bg-green-50/50 flex-1 gap-1 md:gap-2"
                   >
-                    <CheckCircle className="h-4 w-4" />
+                    <CheckCircle className="h-3 w-3 md:h-4 md:w-4" />
                     <span>Completed</span>
                     {tabCounts.completed > 0 && (
                       <span className="ml-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 data-[state=active]:bg-white/20 data-[state=active]:text-white">
@@ -1485,8 +1503,8 @@ export default function DashboardSPA() {
       {/* Sidebar */}
       <div
         className={`${
-          isCollapsed ? "w-20" : "w-56"
-        } transition-all duration-300 bg-white/95 backdrop-blur-sm border-r border-blue-200/50 shadow-xl flex flex-col relative`}
+          isCollapsed ? "w-16 md:w-20" : "w-56 md:w-64 lg:w-72"
+        } transition-all duration-300 bg-white/95 backdrop-blur-sm border-r border-blue-200/50 shadow-xl flex flex-col relative min-w-0`}
       >
         {/* Collapse/Expand Button - Positioned on the edge border */}
         <Button
@@ -1505,7 +1523,7 @@ export default function DashboardSPA() {
         {/* Header */}
         <div
           className={`${
-            isCollapsed ? "p-3" : "px-4 py-3"
+            isCollapsed ? "p-2 md:p-3" : "px-3 py-3 md:px-4"
           } border-b border-blue-200/50`}
         >
           <div
@@ -1524,13 +1542,13 @@ export default function DashboardSPA() {
                 alt="Auto Serve Sidebar Logo"
                 width={48}
                 height={48}
-                className="object-contain drop-shadow-lg w-12 h-12"
+                className="object-contain drop-shadow-lg w-10 h-10 md:w-12 md:h-12"
                 priority
               />
             </div>
             {!isCollapsed && (
               <div className="cursor-pointer" onClick={() => router.push("/")}>
-                <p className="text-lg font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
+                <p className="text-base md:text-lg font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
                   Auto Serve
                 </p>
               </div>
@@ -1542,24 +1560,24 @@ export default function DashboardSPA() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
               <input
                 placeholder="Search..."
-                className="w-full pl-10 pr-4 py-2 bg-gradient-to-r from-blue-50/50 to-orange-50/50 border border-blue-200/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
+                className="w-full pl-10 pr-3 py-2 bg-gradient-to-r from-blue-50/50 to-orange-50/50 border border-blue-200/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-xs md:text-sm"
               />
             </div>
           )}
         </div>
 
         {/* Navigation */}
-        <div className={`flex-1 ${isCollapsed ? "px-3" : "p-4"}`}>
-          <nav className={`space-y-3 ${isCollapsed ? "space-y-4" : ""}`}>
+        <div className={`flex-1 ${isCollapsed ? "px-2 md:px-3" : "p-3 md:p-4"}`}>
+          <nav className={`space-y-2 md:space-y-3 ${isCollapsed ? "md:space-y-4" : ""}`}>
             {getNavigationItems().map((item) => (
               <button
                 key={item.id}
                 onClick={() => setCurrentPage(item.id)}
                 className={`group relative w-full flex items-center ${
-                  isCollapsed ? "justify-center" : "gap-3"
+                  isCollapsed ? "justify-center" : "gap-2 md:gap-3"
                 } ${
-                  isCollapsed ? "px-3 py-4" : "px-4 py-3"
-                } rounded-xl text-left transition-all duration-200 ${
+                  isCollapsed ? "px-2 py-3 md:px-3 md:py-4" : "px-3 py-2 md:px-4 md:py-3"
+                } rounded-lg md:rounded-xl text-left transition-all duration-200 ${
                   currentPage === item.id
                     ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg"
                     : "text-slate-600 hover:bg-gradient-to-r hover:from-blue-50 hover:to-orange-50"
@@ -1577,7 +1595,7 @@ export default function DashboardSPA() {
                 >
                   <item.icon
                     className={`${
-                      isCollapsed ? "h-6 w-6 mb-1" : "h-5 w-5"
+                      isCollapsed ? "h-5 w-5 md:h-6 md:w-6 mb-0 md:mb-1" : "h-4 w-4 md:h-5 md:w-5"
                     } flex-shrink-0 transition-all duration-200 group-hover:scale-110`}
                   />
 
@@ -1591,7 +1609,7 @@ export default function DashboardSPA() {
 
                 {!isCollapsed && (
                   <>
-                    <span className="flex-1 font-medium">{item.label}</span>
+                    <span className="flex-1 font-medium text-sm md:text-base">{item.label}</span>
                     {item.badge && (
                       <span
                         className={`px-2 py-1 text-xs rounded-full ${
@@ -1620,14 +1638,14 @@ export default function DashboardSPA() {
 
         {/* Footer for collapsed state */}
         {isCollapsed && (
-          <div className="p-4 border-t border-blue-200/50">
+          <div className="p-3 md:p-4 border-t border-blue-200/50">
             <div className="flex justify-center">
               <div
-                className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center shadow-lg cursor-pointer hover:from-slate-700 hover:to-slate-800 transition-all duration-200 hover:scale-105"
+                className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-lg md:rounded-xl flex items-center justify-center shadow-lg cursor-pointer hover:from-slate-700 hover:to-slate-800 transition-all duration-200 hover:scale-105"
                 onClick={handleSignOut}
                 title="Sign Out"
               >
-                <span className="text-white font-bold text-sm">
+                <span className="text-white font-bold text-xs md:text-sm">
                   {user?.firstName?.[0] || "U"}
                 </span>
               </div>
@@ -1637,15 +1655,15 @@ export default function DashboardSPA() {
 
         {/* Footer for expanded state */}
         {!isCollapsed && (
-          <div className="p-4 border-t border-blue-200/50">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-sm">
+          <div className="p-3 md:p-4 border-t border-blue-200/50">
+            <div className="flex items-center gap-2 md:gap-3 mb-3">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-slate-600 to-slate-700 rounded-lg md:rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-xs md:text-sm">
                   {user?.firstName?.[0] || "U"}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-800 truncate">
+                <p className="text-xs md:text-sm font-medium text-slate-800 truncate">
                   {user?.firstName} {user?.lastName}
                 </p>
                 <p className="text-xs text-slate-600 truncate">
@@ -1666,16 +1684,16 @@ export default function DashboardSPA() {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto p-4">
+      <main className="flex-1 overflow-auto p-3 md:p-4 lg:p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3 sm:gap-4">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent truncate">
                 {currentPage === "overview"
                   ? "Overview"
                   : currentPage === "services"
-                  ? "Service Menu Customization"
+                  ? "Service Menu"
                   : currentPage === "bookings"
                   ? "Booking Management"
                   : currentPage === "payments"
@@ -1684,7 +1702,7 @@ export default function DashboardSPA() {
                   ? "Review Management"
                   : "Shop Profile"}
               </h1>
-              <p className="text-slate-600 text-sm mt-1">
+              <p className="text-slate-600 text-xs md:text-sm mt-1 line-clamp-2">
                 {currentPage === "overview"
                   ? "Welcome back! Here's what's happening at your shop today."
                   : currentPage === "bookings"
@@ -1698,7 +1716,7 @@ export default function DashboardSPA() {
                   : "Update your shop profile and business settings."}
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
               {currentPage !== "settings" && (
                 <Button
                   variant="outline"
@@ -1738,18 +1756,18 @@ export default function DashboardSPA() {
 
       {/* Booking Details Modal */}
       <Dialog open={bookingDetailsOpen} onOpenChange={setBookingDetailsOpen}>
-        <DialogContent className="max-w-5xl w-[90vw] max-h-[90vh] rounded-2xl border-0 shadow-2xl bg-white p-0">
+        <DialogContent className="max-w-4xl lg:max-w-5xl w-[95vw] sm:w-[90vw] max-h-[90vh] rounded-xl md:rounded-2xl border-0 shadow-2xl bg-white p-0">
           <div className="flex flex-col h-full max-h-[90vh]">
-            <DialogHeader className="px-6 py-4 border-b border-slate-100 bg-gradient-to-r from-blue-50/50 to-slate-50/50 flex-shrink-0">
-              <DialogTitle className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                  <User className="h-5 w-5 text-white" />
+            <DialogHeader className="px-4 md:px-6 py-3 md:py-4 border-b border-slate-100 bg-gradient-to-r from-blue-50/50 to-slate-50/50 flex-shrink-0">
+              <DialogTitle className="flex items-center gap-2 md:gap-3">
+                <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg md:rounded-xl shadow-lg">
+                  <User className="h-4 w-4 md:h-5 md:w-5 text-white" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg font-semibold text-slate-800 truncate">
+                  <h2 className="text-base md:text-lg font-semibold text-slate-800 truncate">
                     {selectedJob?.customer}
                   </h2>
-                  <p className="text-sm text-slate-500 truncate">
+                  <p className="text-xs md:text-sm text-slate-500 truncate">
                     {selectedJob?.vehicle} • {selectedJob?.service}
                   </p>
                 </div>
@@ -1759,40 +1777,43 @@ export default function DashboardSPA() {
             {selectedJob && (
               <div className="flex flex-col flex-1 min-h-0">
                 {/* Dialog Tabs */}
-                <div className="px-6 py-3 border-b border-slate-100 flex-shrink-0">
-                  <div className="grid grid-cols-3 bg-slate-50 rounded-xl p-1 h-11">
+                <div className="px-4 md:px-6 py-3 border-b border-slate-100 flex-shrink-0">
+                  <div className="grid grid-cols-3 bg-slate-50 rounded-lg md:rounded-xl p-1 h-9 md:h-11">
                     <button
                       onClick={() => setActiveDetailTab("details")}
-                      className={`flex items-center justify-center gap-2 rounded-lg font-medium transition-all ${
+                      className={`flex items-center justify-center gap-1 md:gap-2 rounded-lg font-medium transition-all text-xs md:text-sm ${
                         activeDetailTab === "details"
                           ? "bg-white shadow-sm text-blue-600"
                           : "text-slate-600 hover:text-slate-800"
                       }`}
                     >
-                      <Info className="h-4 w-4" />
-                      Job Details
+                      <Info className="h-3 w-3 md:h-4 md:w-4" />
+                      <span className="hidden sm:inline">Job Details</span>
+                      <span className="sm:hidden">Details</span>
                     </button>
                     <button
                       onClick={() => setActiveDetailTab("history")}
-                      className={`flex items-center justify-center gap-2 rounded-lg font-medium transition-all ${
+                      className={`flex items-center justify-center gap-1 md:gap-2 rounded-lg font-medium transition-all text-xs md:text-sm ${
                         activeDetailTab === "history"
                           ? "bg-white shadow-sm text-blue-600"
                           : "text-slate-600 hover:text-slate-800"
                       }`}
                     >
-                      <History className="h-4 w-4" />
-                      Vehicle History
+                      <History className="h-3 w-3 md:h-4 md:w-4" />
+                      <span className="hidden sm:inline">Vehicle History</span>
+                      <span className="sm:hidden">History</span>
                     </button>
                     <button
                       onClick={() => setActiveDetailTab("customer")}
-                      className={`flex items-center justify-center gap-2 rounded-lg font-medium transition-all ${
+                      className={`flex items-center justify-center gap-1 md:gap-2 rounded-lg font-medium transition-all text-xs md:text-sm ${
                         activeDetailTab === "customer"
                           ? "bg-white shadow-sm text-blue-600"
                           : "text-slate-600 hover:text-slate-800"
                       }`}
                     >
-                      <User className="h-4 w-4" />
-                      Customer Info
+                      <User className="h-3 w-3 md:h-4 md:w-4" />
+                      <span className="hidden sm:inline">Customer Info</span>
+                      <span className="sm:hidden">Customer</span>
                     </button>
                   </div>
                 </div>
@@ -1800,11 +1821,11 @@ export default function DashboardSPA() {
                 {/* Content Area - Scrollable */}
                 <div className="flex-1 overflow-y-auto">
                   {activeDetailTab === "details" && (
-                    <div className="px-6 py-4 space-y-6">
+                    <div className="px-4 md:px-6 py-4 space-y-4 md:space-y-6">
                       {/* Status and Schedule */}
                       <Card className="bg-gradient-to-r from-blue-50 to-blue-100/50 border border-blue-200 rounded-xl">
-                        <CardContent className="p-5">
-                          <div className="grid grid-cols-2 gap-4">
+                        <CardContent className="p-4 md:p-5">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                             <div>
                               <p className="text-sm font-medium text-blue-700 mb-1">
                                 Status
@@ -2112,30 +2133,32 @@ export default function DashboardSPA() {
                 </div>
 
                 {/* Dialog Footer with Actions */}
-                <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50">
-                  <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <div className="px-4 md:px-6 py-3 md:py-4 border-t border-slate-100 bg-slate-50/50">
+                  <div className="flex flex-col gap-2 md:gap-3 w-full">
                     {/* Communication Actions */}
-                    <div className="flex gap-2 flex-1">
+                    <div className="flex gap-2 w-full">
                       <Button
                         variant="outline"
                         onClick={() => handleContactCustomer(selectedJob.phone)}
-                        className="flex-1 rounded-lg border-slate-200 text-slate-600 hover:bg-white hover:text-slate-800 hover:border-slate-300"
+                        className="flex-1 rounded-lg border-slate-200 text-slate-600 hover:bg-white hover:text-slate-800 hover:border-slate-300 text-xs md:text-sm"
                       >
-                        <Phone className="h-4 w-4 mr-2" />
-                        Call Customer
+                        <Phone className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                        <span className="hidden sm:inline">Call Customer</span>
+                        <span className="sm:hidden">Call</span>
                       </Button>
                       <Button
                         variant="outline"
                         onClick={() => handleMessageCustomer(selectedJob)}
-                        className="flex-1 rounded-lg border-slate-200 text-slate-600 hover:bg-white hover:text-slate-800 hover:border-slate-300"
+                        className="flex-1 rounded-lg border-slate-200 text-slate-600 hover:bg-white hover:text-slate-800 hover:border-slate-300 text-xs md:text-sm"
                       >
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        Send Message
+                        <MessageSquare className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+                        <span className="hidden sm:inline">Send Message</span>
+                        <span className="sm:hidden">Message</span>
                       </Button>
                     </div>
 
                     {/* Primary Action - Gets more width */}
-                    <div className="flex gap-2 flex-1">
+                    <div className="flex gap-2 w-full">
                       {selectedJob.stage === "confirmed" && (
                         <Button
                           onClick={() => {
