@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import confetti from "canvas-confetti";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -92,7 +93,6 @@ export default function ShopProfilePage() {
   const [licenseStatus, setLicenseStatus] = useState<
     "not-submitted" | "ready" | "pending" | "verified" | "invalid"
   >("not-submitted");
-  const [isVerifying, setIsVerifying] = useState(false);
 
   // Service Menu Data
   const [serviceMenuData, setServiceMenuData] = useState<ServiceMenuData>({
@@ -377,7 +377,6 @@ export default function ShopProfilePage() {
       return;
     }
 
-    setIsVerifying(true);
     setLicenseStatus("pending");
 
     try {
@@ -386,63 +385,12 @@ export default function ShopProfilePage() {
 
       // Success - license verified
       setLicenseStatus("verified");
-      setIsVerifying(false);
-    } catch (error) {
+    } catch {
       // Handle error case
       setLicenseStatus("invalid");
-      setIsVerifying(false);
     }
   };
 
-  const getLicenseStatusConfig = () => {
-    switch (licenseStatus) {
-      case "verified":
-        return {
-          icon: CheckCircle,
-          color: "text-emerald-600",
-          bgColor: "bg-emerald-50",
-          borderColor: "border-emerald-200",
-          label: "Verified",
-          description: "Licence verified by system",
-        };
-      case "ready":
-        return {
-          icon: Shield,
-          color: "text-blue-600",
-          bgColor: "bg-blue-50",
-          borderColor: "border-blue-200",
-          label: "Ready to Verify",
-          description: "Licence format is correct",
-        };
-      case "pending":
-        return {
-          icon: Clock,
-          color: "text-amber-600",
-          bgColor: "bg-amber-50",
-          borderColor: "border-amber-200",
-          label: "Verifying",
-          description: "Checking licence validity",
-        };
-      case "invalid":
-        return {
-          icon: AlertCircle,
-          color: "text-red-600",
-          bgColor: "bg-red-50",
-          borderColor: "border-red-200",
-          label: "Invalid Format",
-          description: "Check licence number format",
-        };
-      default:
-        return {
-          icon: Shield,
-          color: "text-slate-600",
-          bgColor: "bg-slate-50",
-          borderColor: "border-slate-200",
-          label: "Required",
-          description: "Enter your licence number",
-        };
-    }
-  };
 
   const validateField = (field: string, value: string) => {
     let validation: { isValid: boolean; message?: string } = { isValid: true };
@@ -963,9 +911,11 @@ export default function ShopProfilePage() {
                       {formData.photos.map((photo, index) => (
                         <div key={index} className="relative group">
                           <div className="aspect-square rounded-lg overflow-hidden bg-slate-100">
-                            <img
+                            <Image
                               src={photo}
                               alt={`Workshop photo ${index + 1}`}
+                              width={200}
+                              height={200}
                               className="w-full h-full object-cover"
                             />
                           </div>

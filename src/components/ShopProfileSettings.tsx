@@ -32,7 +32,6 @@ import {
   Camera,
   Plus,
   Trash2,
-  Save,
   Clock,
   CreditCard,
   Info,
@@ -83,10 +82,7 @@ export function ShopProfileSettings({ saveRef }: ShopProfileSettingsProps) {
   });
 
   // Credentials State
-  const [motorVehicleLicense, setMotorVehicleLicense] = useState("MVR12345");
-  const [licenseStatus, setLicenseStatus] = useState<
-    "not-submitted" | "pending" | "verified"
-  >("verified");
+  const [motorVehicleLicense] = useState("MVR12345");
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [newCertName, setNewCertName] = useState("");
 
@@ -121,7 +117,6 @@ export function ShopProfileSettings({ saveRef }: ShopProfileSettingsProps) {
   const [validationErrors, setValidationErrors] = useState<
     Record<string, string>
   >({});
-  const [isSaving, setIsSaving] = useState(false);
 
   const specialtyOptions = [
     "European Cars",
@@ -255,8 +250,7 @@ export function ShopProfileSettings({ saveRef }: ShopProfileSettingsProps) {
     );
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
+  const handleSave = useCallback(async () => {
     try {
       // Simulate save operation
       await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -273,10 +267,8 @@ export function ShopProfileSettings({ saveRef }: ShopProfileSettingsProps) {
       // Show success message or redirect
     } catch (error) {
       console.error("Save failed:", error);
-    } finally {
-      setIsSaving(false);
     }
-  };
+  }, [profileData, motorVehicleLicense, certifications, paymentData, businessHoursData]);
 
   const handleBusinessHoursChange = useCallback(
     (data: Record<string, unknown>) => {
@@ -297,7 +289,7 @@ export function ShopProfileSettings({ saveRef }: ShopProfileSettingsProps) {
     if (saveRef) {
       saveRef.current = handleSave;
     }
-  }, [saveRef]);
+  }, [saveRef, handleSave]);
 
   return (
     <div className="space-y-6">
