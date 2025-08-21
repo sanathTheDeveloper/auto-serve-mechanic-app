@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   CreditCard,
   Building2,
@@ -17,14 +17,12 @@ import {
   TrendingUp,
   Eye,
   EyeOff,
-  Award,
-  Car
-} from 'lucide-react';
+} from "lucide-react";
 
 interface PaymentMethod {
   id: string;
   name: string;
-  type: 'bank' | 'digital' | 'crypto';
+  type: "bank" | "digital" | "crypto";
   icon: React.ReactNode;
   description: string;
   processingTime: string;
@@ -50,65 +48,81 @@ interface PaymentSetupProps {
 
 export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
   const [formData, setFormData] = useState({
-    abn: initialData?.abn || '',
-    businessName: initialData?.businessName || '',
-    businessType: initialData?.businessType || 'sole-trader',
-    bankAccount: initialData?.bankAccount || '',
-    bsb: '',
-    accountNumber: '',
-    accountName: '',
-    motorVehicleRepairersLicence: '',
-    paymentMethods: initialData?.paymentMethods || ['bank-transfer'],
+    abn: initialData?.abn || "",
+    businessName: initialData?.businessName || "",
+    businessType: initialData?.businessType || "sole-trader",
+    bankAccount: initialData?.bankAccount || "",
+    bsb: "",
+    accountNumber: "",
+    accountName: "",
+    paymentMethods: initialData?.paymentMethods || ["bank-transfer"],
     taxSettings: {
       gstRegistered: initialData?.taxSettings?.gstRegistered || false,
-      gstNumber: initialData?.taxSettings?.gstNumber || '',
-      taxRate: initialData?.taxSettings?.taxRate || 10
-    }
+      gstNumber: initialData?.taxSettings?.gstNumber || "",
+      taxRate: initialData?.taxSettings?.taxRate || 10,
+    },
   });
 
   const [showAccountDetails, setShowAccountDetails] = useState(false);
   const [isLookingUpABN, setIsLookingUpABN] = useState(false);
-  const [abnLookupResult, setABNLookupResult] = useState<{ businessName?: string; isValid?: boolean } | null>(null);
-  const [activeTab, setActiveTab] = useState<'basic' | 'methods' | 'tax'>('basic');
+  const [abnLookupResult, setABNLookupResult] = useState<{
+    businessName?: string;
+    isValid?: boolean;
+  } | null>(null);
+  const [activeTab, setActiveTab] = useState<"basic" | "methods" | "tax">(
+    "basic"
+  );
 
   const paymentMethods: PaymentMethod[] = [
     {
-      id: 'bank-transfer',
-      name: 'Bank Transfer',
-      type: 'bank',
+      id: "bank-transfer",
+      name: "Bank Transfer",
+      type: "bank",
       icon: <Banknote className="h-5 w-5" />,
-      description: 'Direct bank account transfers (recommended)',
-      processingTime: '1-3 business days',
-      fees: 'No fees',
-      enabled: true
+      description: "Direct bank account transfers (recommended)",
+      processingTime: "1-3 business days",
+      fees: "No fees",
+      enabled: true,
     },
     {
-      id: 'paypal',
-      name: 'PayPal',
-      type: 'digital',
+      id: "paypal",
+      name: "PayPal",
+      type: "digital",
       icon: <Wallet className="h-5 w-5" />,
-      description: 'PayPal payments',
-      processingTime: 'Instant',
-      fees: '2.9% + $0.30',
-      enabled: false
+      description: "PayPal payments",
+      processingTime: "Instant",
+      fees: "2.9% + $0.30",
+      enabled: false,
     },
     {
-      id: 'stripe',
-      name: 'Stripe',
-      type: 'digital',
+      id: "stripe",
+      name: "Stripe",
+      type: "digital",
       icon: <CreditCard className="h-5 w-5" />,
-      description: 'Credit/debit card payments',
-      processingTime: '2-7 business days',
-      fees: '2.9% + $0.30',
-      enabled: false
-    }
+      description: "Credit/debit card payments",
+      processingTime: "2-7 business days",
+      fees: "2.9% + $0.30",
+      enabled: false,
+    },
   ];
 
   const businessTypes = [
-    { id: 'sole-trader', name: 'Sole Trader', description: 'Individual business owner' },
-    { id: 'partnership', name: 'Partnership', description: 'Business owned by partners' },
-    { id: 'company', name: 'Company (Pty Ltd)', description: 'Incorporated company' },
-    { id: 'trust', name: 'Trust', description: 'Trust structure' }
+    {
+      id: "sole-trader",
+      name: "Sole Trader",
+      description: "Individual business owner",
+    },
+    {
+      id: "partnership",
+      name: "Partnership",
+      description: "Business owned by partners",
+    },
+    {
+      id: "company",
+      name: "Company (Pty Ltd)",
+      description: "Incorporated company",
+    },
+    { id: "trust", name: "Trust", description: "Trust structure" },
   ];
 
   const updateFormData = (field: keyof typeof formData, value: unknown) => {
@@ -121,12 +135,12 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
     const newData = { ...formData };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let current: any = newData;
-    
+
     for (let i = 0; i < path.length - 1; i++) {
       current = current[path[i]];
     }
     current[path[path.length - 1]] = value;
-    
+
     setFormData(newData);
     onDataChange(newData);
   };
@@ -134,10 +148,10 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
   const togglePaymentMethod = (methodId: string) => {
     const currentMethods = formData.paymentMethods;
     const newMethods = currentMethods.includes(methodId)
-      ? currentMethods.filter(id => id !== methodId)
+      ? currentMethods.filter((id) => id !== methodId)
       : [...currentMethods, methodId];
-    
-    updateFormData('paymentMethods', newMethods);
+
+    updateFormData("paymentMethods", newMethods);
   };
 
   // const copyToClipboard = (text: string) => {
@@ -147,48 +161,50 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
   // };
 
   const formatABN = (value: string) => {
-    const numbers = value.replace(/\D/g, '');
+    const numbers = value.replace(/\D/g, "");
     if (numbers.length <= 11) {
-      return numbers.replace(/(\d{2})(\d{3})(\d{3})(\d{3})/, '$1 $2 $3 $4').trim();
+      return numbers
+        .replace(/(\d{2})(\d{3})(\d{3})(\d{3})/, "$1 $2 $3 $4")
+        .trim();
     }
     return value;
   };
 
   const validateABN = (abn: string) => {
-    const numbers = abn.replace(/\s/g, '');
+    const numbers = abn.replace(/\s/g, "");
     return numbers.length === 11 && /^\d+$/.test(numbers);
   };
 
   const lookupABN = async (abn: string) => {
     if (!validateABN(abn)) return;
-    
+
     setIsLookingUpABN(true);
-    
+
     // Simulate ABN lookup API call
     try {
       // In a real implementation, you would call the Australian Business Register API
       // For demo purposes, we'll simulate different responses based on ABN patterns
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
-      
-      const numbers = abn.replace(/\s/g, '');
-      let mockBusinessName = '';
-      
+      await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate network delay
+
+      const numbers = abn.replace(/\s/g, "");
+      let mockBusinessName = "";
+
       // Mock responses for demo
-      if (numbers.startsWith('12')) {
-        mockBusinessName = 'Melbourne Auto Service Pty Ltd';
-      } else if (numbers.startsWith('23')) {
-        mockBusinessName = 'Collins Street Automotive';
-      } else if (numbers.startsWith('34')) {
-        mockBusinessName = 'Premier Car Care Services';
+      if (numbers.startsWith("12")) {
+        mockBusinessName = "Melbourne Auto Service Pty Ltd";
+      } else if (numbers.startsWith("23")) {
+        mockBusinessName = "Collins Street Automotive";
+      } else if (numbers.startsWith("34")) {
+        mockBusinessName = "Premier Car Care Services";
       } else {
-        mockBusinessName = 'Auto Service Business';
+        mockBusinessName = "Auto Service Business";
       }
-      
+
       setABNLookupResult({ businessName: mockBusinessName, isValid: true });
-      
+
       // Auto-populate business name if it's empty
       if (!formData.businessName) {
-        updateFormData('businessName', mockBusinessName);
+        updateFormData("businessName", mockBusinessName);
       }
     } catch {
       setABNLookupResult({ isValid: false });
@@ -199,17 +215,17 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
 
   const handleABNChange = (value: string) => {
     const formatted = formatABN(value);
-    updateFormData('abn', formatted);
-    
+    updateFormData("abn", formatted);
+
     // Clear previous lookup result
     setABNLookupResult(null);
-    
+
     // Trigger lookup after user stops typing (debounced)
     if (validateABN(formatted)) {
       const timeoutId = setTimeout(() => {
         lookupABN(formatted);
       }, 800);
-      
+
       return () => clearTimeout(timeoutId);
     }
   };
@@ -219,17 +235,17 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
       {/* Tab Navigation */}
       <div className="flex border-b border-slate-200 bg-white/90 backdrop-blur-sm rounded-t-xl">
         {[
-          { id: 'basic', label: 'Business Details', icon: Building2 },
-          { id: 'methods', label: 'Payment Methods', icon: CreditCard },
-          { id: 'tax', label: 'Tax Settings', icon: TrendingUp }
-        ].map(tab => (
+          { id: "basic", label: "Business Details", icon: Building2 },
+          { id: "methods", label: "Payment Methods", icon: CreditCard },
+          { id: "tax", label: "Tax Settings", icon: TrendingUp },
+        ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id as typeof activeTab)}
             className={`flex items-center gap-2 px-6 py-4 font-medium transition-all ${
               activeTab === tab.id
-                ? 'border-b-2 border-blue-500 text-blue-600 bg-blue-50/50'
-                : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+                ? "border-b-2 border-blue-500 text-blue-600 bg-blue-50/50"
+                : "text-slate-600 hover:text-slate-800 hover:bg-slate-50"
             }`}
           >
             <tab.icon className="h-4 w-4" />
@@ -239,7 +255,7 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
       </div>
 
       {/* Basic Business Details */}
-      {activeTab === 'basic' && (
+      {activeTab === "basic" && (
         <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl text-slate-800">
@@ -257,18 +273,20 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
                 Business Structure *
               </label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {businessTypes.map(type => (
+                {businessTypes.map((type) => (
                   <button
                     key={type.id}
-                    onClick={() => updateFormData('businessType', type.id)}
+                    onClick={() => updateFormData("businessType", type.id)}
                     className={`p-4 rounded-xl border-2 transition-all text-left ${
                       formData.businessType === type.id
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                        ? "border-blue-500 bg-blue-50 text-blue-700"
+                        : "border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                     }`}
                   >
                     <div className="font-semibold text-sm">{type.name}</div>
-                    <div className="text-xs text-slate-600 mt-1">{type.description}</div>
+                    <div className="text-xs text-slate-600 mt-1">
+                      {type.description}
+                    </div>
                   </button>
                 ))}
               </div>
@@ -287,10 +305,10 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
                   onChange={(e) => handleABNChange(e.target.value)}
                   className={`pl-10 pr-10 ${
                     formData.abn && !validateABN(formData.abn)
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
+                      ? "border-red-300 focus:border-red-500 focus:ring-red-500/20"
                       : abnLookupResult?.isValid
-                      ? 'border-emerald-300 focus:border-emerald-500 focus:ring-emerald-500/20'
-                      : ''
+                      ? "border-emerald-300 focus:border-emerald-500 focus:ring-emerald-500/20"
+                      : ""
                   }`}
                   maxLength={13}
                 />
@@ -324,7 +342,8 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
               {formData.abn && validateABN(formData.abn) && !isLookingUpABN && (
                 <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
                   <Info className="h-3 w-3" />
-                  Are you registered for GST? You can configure tax settings in the next step.
+                  Are you registered for GST? You can configure tax settings in
+                  the next step.
                 </p>
               )}
             </div>
@@ -334,52 +353,37 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
               <label className="block text-sm font-medium text-slate-700 mb-2">
                 Registered Business Name *
                 {abnLookupResult?.businessName && (
-                  <span className="text-xs text-emerald-600 ml-1">(Auto-populated from ABN lookup)</span>
+                  <span className="text-xs text-emerald-600 ml-1">
+                    (Auto-populated from ABN lookup)
+                  </span>
                 )}
               </label>
               <Input
                 placeholder="Your Auto Service Pty Ltd"
                 value={formData.businessName}
-                onChange={(e) => updateFormData('businessName', e.target.value)}
+                onChange={(e) => updateFormData("businessName", e.target.value)}
                 className="w-full"
               />
-            </div>
-
-            {/* Motor Vehicle Repairer's Licence */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Motor Vehicle Repairer&apos;s Licence
-                <span className="text-xs text-slate-500 ml-1">(Optional but recommended)</span>
-              </label>
-              <div className="relative">
-                <Award className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input
-                  placeholder="MVR12345"
-                  value={formData.motorVehicleRepairersLicence}
-                  onChange={(e) => updateFormData('motorVehicleRepairersLicence', e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <div className="flex items-start gap-2 mt-2 text-xs text-blue-700 bg-blue-50 p-2 rounded-lg">
-                <Car className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                <p>
-                  <strong>Trust Signal:</strong> This licence number builds customer confidence and is required for automotive work in Victoria.
-                </p>
-              </div>
             </div>
 
             {/* Bank Account Details */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="text-lg font-semibold text-slate-800">Bank Account Details</h4>
+                <h4 className="text-lg font-semibold text-slate-800">
+                  Bank Account Details
+                </h4>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowAccountDetails(!showAccountDetails)}
                   className="text-blue-600 hover:text-blue-700"
                 >
-                  {showAccountDetails ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  {showAccountDetails ? 'Hide' : 'Show'} Details
+                  {showAccountDetails ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                  {showAccountDetails ? "Hide" : "Show"} Details
                 </Button>
               </div>
 
@@ -392,12 +396,14 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
                     placeholder="083-004"
                     value={formData.bsb}
                     onChange={(e) => {
-                      const formatted = e.target.value.replace(/\D/g, '').replace(/(\d{3})(\d{3})/, '$1-$2');
-                      updateFormData('bsb', formatted);
+                      const formatted = e.target.value
+                        .replace(/\D/g, "")
+                        .replace(/(\d{3})(\d{3})/, "$1-$2");
+                      updateFormData("bsb", formatted);
                     }}
                     className="font-mono"
                     maxLength={7}
-                    type={showAccountDetails ? 'text' : 'password'}
+                    type={showAccountDetails ? "text" : "password"}
                   />
                 </div>
 
@@ -409,12 +415,12 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
                     placeholder="12345678"
                     value={formData.accountNumber}
                     onChange={(e) => {
-                      const numbers = e.target.value.replace(/\D/g, '');
-                      updateFormData('accountNumber', numbers);
+                      const numbers = e.target.value.replace(/\D/g, "");
+                      updateFormData("accountNumber", numbers);
                     }}
                     className="font-mono"
                     maxLength={10}
-                    type={showAccountDetails ? 'text' : 'password'}
+                    type={showAccountDetails ? "text" : "password"}
                   />
                 </div>
               </div>
@@ -426,8 +432,10 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
                 <Input
                   placeholder="Your Auto Service Pty Ltd"
                   value={formData.accountName}
-                  onChange={(e) => updateFormData('accountName', e.target.value)}
-                  type={showAccountDetails ? 'text' : 'password'}
+                  onChange={(e) =>
+                    updateFormData("accountName", e.target.value)
+                  }
+                  type={showAccountDetails ? "text" : "password"}
                 />
               </div>
 
@@ -435,10 +443,13 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
               <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <Shield className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
                 <div className="text-sm">
-                  <p className="font-semibold text-blue-800 mb-1">Secure Payment Processing</p>
+                  <p className="font-semibold text-blue-800 mb-1">
+                    Secure Payment Processing
+                  </p>
                   <p className="text-blue-700">
-                    Your bank details are encrypted and securely stored. We only use this information 
-                    to process payments for completed services.
+                    Your bank details are encrypted and securely stored. We only
+                    use this information to process payments for completed
+                    services.
                   </p>
                 </div>
               </div>
@@ -448,7 +459,7 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
       )}
 
       {/* Payment Methods */}
-      {activeTab === 'methods' && (
+      {activeTab === "methods" && (
         <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl text-slate-800">
@@ -461,44 +472,56 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4">
-              {paymentMethods.map(method => (
+              {paymentMethods.map((method) => (
                 <Card
                   key={method.id}
                   className={`cursor-pointer transition-all border-2 ${
                     formData.paymentMethods.includes(method.id)
-                      ? 'border-blue-500 bg-blue-50/50 shadow-lg'
-                      : 'border-slate-200 hover:border-slate-300 hover:shadow-md'
+                      ? "border-blue-500 bg-blue-50/50 shadow-lg"
+                      : "border-slate-200 hover:border-slate-300 hover:shadow-md"
                   }`}
                   onClick={() => togglePaymentMethod(method.id)}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4">
-                        <div className={`p-3 rounded-xl ${
-                          formData.paymentMethods.includes(method.id)
-                            ? 'bg-blue-500 text-white'
-                            : 'bg-slate-100 text-slate-600'
-                        }`}>
+                        <div
+                          className={`p-3 rounded-xl ${
+                            formData.paymentMethods.includes(method.id)
+                              ? "bg-blue-500 text-white"
+                              : "bg-slate-100 text-slate-600"
+                          }`}
+                        >
                           {method.icon}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <h4 className="font-semibold text-slate-800">{method.name}</h4>
-                            {method.id === 'bank-transfer' && (
+                            <h4 className="font-semibold text-slate-800">
+                              {method.name}
+                            </h4>
+                            {method.id === "bank-transfer" && (
                               <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-full font-medium">
                                 Recommended
                               </span>
                             )}
                           </div>
-                          <p className="text-sm text-slate-600 mb-3">{method.description}</p>
+                          <p className="text-sm text-slate-600 mb-3">
+                            {method.description}
+                          </p>
                           <div className="grid grid-cols-2 gap-4 text-xs">
                             <div>
-                              <span className="text-slate-500">Processing Time:</span>
-                              <div className="font-medium text-slate-700">{method.processingTime}</div>
+                              <span className="text-slate-500">
+                                Processing Time:
+                              </span>
+                              <div className="font-medium text-slate-700">
+                                {method.processingTime}
+                              </div>
                             </div>
                             <div>
                               <span className="text-slate-500">Fees:</span>
-                              <div className="font-medium text-slate-700">{method.fees}</div>
+                              <div className="font-medium text-slate-700">
+                                {method.fees}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -521,10 +544,13 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
               <div className="flex items-start gap-3">
                 <Info className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
                 <div>
-                  <h4 className="font-semibold text-amber-800 mb-2">Platform Commission</h4>
+                  <h4 className="font-semibold text-amber-800 mb-2">
+                    Platform Commission
+                  </h4>
                   <p className="text-sm text-amber-700 mb-3">
-                    Auto Serve charges a standard 15% commission on all completed bookings. 
-                    This covers platform maintenance, customer support, and payment processing.
+                    Auto Serve charges a standard 15% commission on all
+                    completed bookings. This covers platform maintenance,
+                    customer support, and payment processing.
                   </p>
                   <div className="flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-amber-600" />
@@ -540,7 +566,7 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
       )}
 
       {/* Tax Settings */}
-      {activeTab === 'tax' && (
+      {activeTab === "tax" && (
         <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-xl text-slate-800">
@@ -556,20 +582,31 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
             <div className="space-y-4">
               <div className="flex items-center justify-between p-4 border border-slate-200 rounded-lg">
                 <div>
-                  <h4 className="font-semibold text-slate-800">GST Registered Business</h4>
+                  <h4 className="font-semibold text-slate-800">
+                    GST Registered Business
+                  </h4>
                   <p className="text-sm text-slate-600">
                     Are you registered for Goods and Services Tax (GST)?
                   </p>
                 </div>
                 <button
-                  onClick={() => updateNestedFormData(['taxSettings', 'gstRegistered'], !formData.taxSettings.gstRegistered)}
+                  onClick={() =>
+                    updateNestedFormData(
+                      ["taxSettings", "gstRegistered"],
+                      !formData.taxSettings.gstRegistered
+                    )
+                  }
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                    formData.taxSettings.gstRegistered ? 'bg-blue-500' : 'bg-slate-300'
+                    formData.taxSettings.gstRegistered
+                      ? "bg-blue-500"
+                      : "bg-slate-300"
                   }`}
                 >
                   <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      formData.taxSettings.gstRegistered ? 'translate-x-6' : 'translate-x-1'
+                      formData.taxSettings.gstRegistered
+                        ? "translate-x-6"
+                        : "translate-x-1"
                     }`}
                   />
                 </button>
@@ -584,7 +621,12 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
                     <Input
                       placeholder="12 345 678 901"
                       value={formData.taxSettings.gstNumber}
-                      onChange={(e) => updateNestedFormData(['taxSettings', 'gstNumber'], e.target.value)}
+                      onChange={(e) =>
+                        updateNestedFormData(
+                          ["taxSettings", "gstNumber"],
+                          e.target.value
+                        )
+                      }
                       className="w-full"
                     />
                     <p className="text-xs text-slate-500 mt-1">
@@ -600,7 +642,12 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
                       <Input
                         type="number"
                         value={formData.taxSettings.taxRate}
-                        onChange={(e) => updateNestedFormData(['taxSettings', 'taxRate'], Number(e.target.value))}
+                        onChange={(e) =>
+                          updateNestedFormData(
+                            ["taxSettings", "taxRate"],
+                            Number(e.target.value)
+                          )
+                        }
                         className="pr-8"
                         min="0"
                         max="20"
@@ -617,15 +664,22 @@ export function PaymentSetup({ initialData, onDataChange }: PaymentSetupProps) {
 
             {/* Tax Information */}
             <div className="p-6 bg-slate-50 border border-slate-200 rounded-xl">
-              <h4 className="font-semibold text-slate-800 mb-3">Tax Compliance Information</h4>
+              <h4 className="font-semibold text-slate-800 mb-3">
+                Tax Compliance Information
+              </h4>
               <div className="space-y-3 text-sm text-slate-600">
                 <div className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <p>All invoices will automatically include applicable taxes</p>
+                  <p>
+                    All invoices will automatically include applicable taxes
+                  </p>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                  <p>Tax calculations are handled automatically based on your settings</p>
+                  <p>
+                    Tax calculations are handled automatically based on your
+                    settings
+                  </p>
                 </div>
                 <div className="flex items-start gap-2">
                   <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   format,
   isSameDay,
@@ -65,6 +65,7 @@ import { useRouter } from "next/navigation";
 import { ServiceMenuManager } from "@/components/ServiceMenuManager";
 import { InvoicingPage } from "@/components/invoicing/InvoicingPage";
 import { ReviewsManagement } from "@/components/reviews/ReviewsManagement";
+import { ShopProfileSettings } from "@/components/ShopProfileSettings";
 import { mockJobs, statusConfig, getJobsByStage } from "@/data/jobs";
 import { Job, JobFilter } from "@/types/booking";
 import Image from "next/image";
@@ -90,7 +91,7 @@ const getNavigationItems = () => {
     { id: "services", icon: Wrench, label: "Service Menu" },
     { id: "payments", icon: CreditCard, label: "Invoicing" },
     { id: "reviews", icon: Star, label: "Reviews", badge: "3" },
-    { id: "settings", icon: Settings, label: "Shop Profile" },
+    { id: "settings", icon: Settings, label: "Settings" },
   ];
 };
 
@@ -151,6 +152,9 @@ export default function DashboardSPA() {
   const [activeDetailTab, setActiveDetailTab] = useState<
     "details" | "history" | "customer"
   >("details");
+
+  // Shop profile save ref
+  const shopProfileSaveRef = useRef<(() => Promise<void>) | null>(null);
 
   // Booking management computed values (must be before early returns)
   const filteredJobs = useMemo(() => {
@@ -1469,34 +1473,7 @@ export default function DashboardSPA() {
         return <ReviewsManagement />;
 
       case "settings":
-        return (
-          <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
-                    Shop Profile Setup
-                  </h2>
-                  <p className="text-slate-600 mt-1">
-                    Services offered, pricing, business hours, capacity, and
-                    payment info
-                  </p>
-                </div>
-                <Button className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
-                  <Settings className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
-              </div>
-              <div className="text-center py-12 text-slate-500">
-                <Settings className="h-16 w-16 mx-auto mb-4 text-slate-300" />
-                <p>Configure your shop profile and business settings</p>
-                <p className="text-sm">
-                  Manage hours, capacity, and service offerings
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        );
+        return <ShopProfileSettings saveRef={shopProfileSaveRef} />;
 
       default:
         return renderMainContent();
@@ -1508,7 +1485,7 @@ export default function DashboardSPA() {
       {/* Sidebar */}
       <div
         className={`${
-          isCollapsed ? "w-20" : "w-64"
+          isCollapsed ? "w-20" : "w-56"
         } transition-all duration-300 bg-white/95 backdrop-blur-sm border-r border-blue-200/50 shadow-xl flex flex-col relative`}
       >
         {/* Collapse/Expand Button - Positioned on the edge border */}
@@ -1553,8 +1530,8 @@ export default function DashboardSPA() {
             </div>
             {!isCollapsed && (
               <div className="cursor-pointer" onClick={() => router.push("/")}>
-                <p className="text-sm text-slate-600 font-medium">
-                  The Mechanic App
+                <p className="text-lg font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent">
+                  Auto Serve
                 </p>
               </div>
             )}
@@ -1722,21 +1699,35 @@ export default function DashboardSPA() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-blue-200 text-slate-600 hover:bg-blue-50"
-              >
-                <Bell className="h-4 w-4 mr-2" />
-                Notifications
-              </Button>
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                New Booking
-              </Button>
+              {currentPage !== "settings" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-blue-200 text-slate-600 hover:bg-blue-50"
+                >
+                  <Bell className="h-4 w-4 mr-2" />
+                  Notifications
+                </Button>
+              )}
+              {currentPage === "settings" && (
+                <Button
+                  size="sm"
+                  onClick={() => shopProfileSaveRef.current?.()}
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Save Changes
+                </Button>
+              )}
+              {currentPage !== "settings" && (
+                <Button
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Booking
+                </Button>
+              )}
             </div>
           </div>
 
