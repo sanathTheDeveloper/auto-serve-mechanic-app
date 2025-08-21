@@ -29,6 +29,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import {
   Home,
   Calendar,
   Wrench,
@@ -150,12 +158,29 @@ export default function DashboardSPA() {
   const [filters, setFilters] = useState<JobFilter>({});
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [bookingDetailsOpen, setBookingDetailsOpen] = useState(false);
+  const [newBookingOpen, setNewBookingOpen] = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState<
     "details" | "history" | "customer"
   >("details");
 
   // Shop profile save ref
   const shopProfileSaveRef = useRef<(() => Promise<void>) | null>(null);
+
+  // New booking form state
+  const [newBookingForm, setNewBookingForm] = useState({
+    customerName: "",
+    customerEmail: "",
+    customerPhone: "",
+    vehicleMake: "",
+    vehicleModel: "",
+    vehicleYear: "",
+    vehicleLicense: "",
+    serviceType: "",
+    description: "",
+    preferredDate: "",
+    preferredTime: "",
+    priority: "medium" as "low" | "medium" | "high"
+  });
 
   // Booking management computed values (must be before early returns)
   const filteredJobs = useMemo(() => {
@@ -288,6 +313,107 @@ export default function DashboardSPA() {
 
   const handleContactCustomer = (phone: string) => {
     window.open(`tel:${phone}`, "_self");
+  };
+
+  // New booking form handlers
+  const handleNewBookingFormChange = (field: string, value: string) => {
+    setNewBookingForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleNewBookingSubmit = async () => {
+    try {
+      // Basic validation
+      if (!newBookingForm.customerName || !newBookingForm.customerPhone || !newBookingForm.serviceType) {
+        alert("Please fill in all required fields (Customer Name, Phone, and Service Type)");
+        return;
+      }
+
+      // Create new booking object
+      const newBooking = {
+        id: `job-${Date.now()}`,
+        customer: {
+          name: newBookingForm.customerName,
+          email: newBookingForm.customerEmail,
+          phone: newBookingForm.customerPhone,
+        },
+        vehicle: {
+          make: newBookingForm.vehicleMake,
+          model: newBookingForm.vehicleModel,
+          year: newBookingForm.vehicleYear,
+          license: newBookingForm.vehicleLicense,
+        },
+        service: {
+          type: newBookingForm.serviceType,
+          description: newBookingForm.description,
+        },
+        scheduling: {
+          preferredDate: newBookingForm.preferredDate,
+          preferredTime: newBookingForm.preferredTime,
+        },
+        priority: newBookingForm.priority,
+        status: "pending",
+        createdAt: new Date().toISOString(),
+      };
+
+      // Here you would typically send this to your backend API
+      console.log("New booking created:", newBooking);
+      
+      // Simulate sending notification to customer
+      const notificationMessage = `
+Dear ${newBookingForm.customerName},
+
+Your service booking has been confirmed! Here are the details:
+
+🚗 Vehicle: ${newBookingForm.vehicleMake} ${newBookingForm.vehicleModel} ${newBookingForm.vehicleYear}
+🔧 Service: ${newBookingForm.serviceType.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+📅 Preferred Date: ${newBookingForm.preferredDate ? format(new Date(newBookingForm.preferredDate), 'MMMM d, yyyy') : 'To be scheduled'}
+⏰ Preferred Time: ${newBookingForm.preferredTime ? newBookingForm.preferredTime.replace(':', ':') + (parseInt(newBookingForm.preferredTime) < 12 ? ' AM' : ' PM') : 'To be confirmed'}
+⚡ Priority: ${newBookingForm.priority.charAt(0).toUpperCase() + newBookingForm.priority.slice(1)}
+
+We will contact you shortly to confirm the appointment details.
+
+Best regards,
+Auto Serve Team
+      `.trim();
+
+      // In a real app, you would send SMS/Email here
+      console.log("Customer notification:", {
+        to: newBookingForm.customerPhone,
+        email: newBookingForm.customerEmail,
+        message: notificationMessage
+      });
+      
+      // Show success message
+      alert(`Booking created successfully! 
+      
+✅ Booking ID: ${newBooking.id}
+📱 Customer notification sent to: ${newBookingForm.customerPhone}
+${newBookingForm.customerEmail ? `📧 Email confirmation sent to: ${newBookingForm.customerEmail}` : ''}`);
+      
+      // Reset form and close modal
+      setNewBookingForm({
+        customerName: "",
+        customerEmail: "",
+        customerPhone: "",
+        vehicleMake: "",
+        vehicleModel: "",
+        vehicleYear: "",
+        vehicleLicense: "",
+        serviceType: "",
+        description: "",
+        preferredDate: "",
+        preferredTime: "",
+        priority: "medium"
+      });
+      setNewBookingOpen(false);
+      
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      alert("Error creating booking. Please try again.");
+    }
   };
 
   // Booking action handlers
@@ -1741,6 +1867,7 @@ export default function DashboardSPA() {
                 <Button
                   size="sm"
                   className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                  onClick={() => setNewBookingOpen(true)}
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   New Booking
@@ -2238,6 +2365,260 @@ ${selectedJob.description ? `Notes: ${selectedJob.description}` : ""}
                 </div>
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Booking Modal */}
+      <Dialog open={newBookingOpen} onOpenChange={setNewBookingOpen}>
+        <DialogContent className="max-w-4xl w-[95vw] sm:w-[90vw] lg:w-[85vw] xl:w-[80vw] max-h-[95vh] rounded-xl md:rounded-2xl border-0 shadow-2xl bg-white p-0 overflow-hidden">
+          <div className="flex flex-col h-full max-h-[95vh]">
+            <DialogHeader className="px-4 md:px-6 py-3 md:py-4 border-b border-slate-100 bg-gradient-to-r from-blue-50/50 to-slate-50/50 flex-shrink-0">
+              <DialogTitle className="flex items-center gap-2 md:gap-3">
+                <div className="p-2 bg-blue-500 rounded-lg">
+                  <Plus className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg md:text-xl font-semibold text-slate-800">
+                    Create New Booking
+                  </h3>
+                  <p className="text-sm text-slate-500 mt-1">
+                    Add a new service booking for a customer
+                  </p>
+                </div>
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="flex-1 overflow-y-auto p-4 md:p-6" style={{ maxHeight: 'calc(95vh - 160px)' }}>
+              <div className="space-y-4 lg:space-y-6">
+                {/* Customer Information */}
+                <div className="space-y-3 lg:space-y-4">
+                  <h4 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <Users className="h-5 w-5 text-blue-500" />
+                    Customer Information
+                  </h4>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-slate-700">
+                        Customer Name *
+                      </label>
+                      <Input
+                        placeholder="Enter customer name"
+                        value={newBookingForm.customerName}
+                        onChange={(e) => handleNewBookingFormChange("customerName", e.target.value)}
+                        className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-slate-700">
+                        Phone Number *
+                      </label>
+                      <Input
+                        placeholder="Enter phone number"
+                        value={newBookingForm.customerPhone}
+                        onChange={(e) => handleNewBookingFormChange("customerPhone", e.target.value)}
+                        className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10"
+                      />
+                    </div>
+                    <div className="space-y-3 lg:col-span-2">
+                      <label className="text-sm font-medium text-slate-700">
+                        Email Address
+                      </label>
+                      <Input
+                        placeholder="Enter email address"
+                        type="email"
+                        value={newBookingForm.customerEmail}
+                        onChange={(e) => handleNewBookingFormChange("customerEmail", e.target.value)}
+                        className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vehicle Information */}
+                <div className="space-y-3 lg:space-y-4">
+                  <h4 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <Car className="h-5 w-5 text-blue-500" />
+                    Vehicle Information
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-4 lg:gap-6">
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-slate-700">
+                        Make
+                      </label>
+                      <Input
+                        placeholder="e.g., Toyota"
+                        value={newBookingForm.vehicleMake}
+                        onChange={(e) => handleNewBookingFormChange("vehicleMake", e.target.value)}
+                        className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-slate-700">
+                        Model
+                      </label>
+                      <Input
+                        placeholder="e.g., Camry"
+                        value={newBookingForm.vehicleModel}
+                        onChange={(e) => handleNewBookingFormChange("vehicleModel", e.target.value)}
+                        className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-slate-700">
+                        Year
+                      </label>
+                      <Input
+                        placeholder="e.g., 2020"
+                        value={newBookingForm.vehicleYear}
+                        onChange={(e) => handleNewBookingFormChange("vehicleYear", e.target.value)}
+                        className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10"
+                      />
+                    </div>
+                    <div className="space-y-3 md:col-span-3 lg:col-span-3">
+                      <label className="text-sm font-medium text-slate-700">
+                        License Plate
+                      </label>
+                      <Input
+                        placeholder="Enter license plate number"
+                        value={newBookingForm.vehicleLicense}
+                        onChange={(e) => handleNewBookingFormChange("vehicleLicense", e.target.value)}
+                        className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Service Information */}
+                <div className="space-y-3 lg:space-y-4">
+                  <h4 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <Wrench className="h-5 w-5 text-blue-500" />
+                    Service Information
+                  </h4>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-slate-700">
+                        Service Type *
+                      </label>
+                      <Select
+                        value={newBookingForm.serviceType}
+                        onValueChange={(value) => handleNewBookingFormChange("serviceType", value)}
+                      >
+                        <SelectTrigger className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10">
+                          <SelectValue placeholder="Select service type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="oil-change">Oil Change</SelectItem>
+                          <SelectItem value="brake-service">Brake Service</SelectItem>
+                          <SelectItem value="tire-service">Tire Service</SelectItem>
+                          <SelectItem value="engine-diagnostic">Engine Diagnostic</SelectItem>
+                          <SelectItem value="transmission">Transmission Service</SelectItem>
+                          <SelectItem value="ac-service">A/C Service</SelectItem>
+                          <SelectItem value="battery-service">Battery Service</SelectItem>
+                          <SelectItem value="inspection">Vehicle Inspection</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-slate-700">
+                        Priority Level
+                      </label>
+                      <Select
+                        value={newBookingForm.priority}
+                        onValueChange={(value) => handleNewBookingFormChange("priority", value)}
+                      >
+                        <SelectTrigger className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10">
+                          <SelectValue placeholder="Select priority" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="low">Low - Routine maintenance</SelectItem>
+                          <SelectItem value="medium">Medium - Standard service</SelectItem>
+                          <SelectItem value="high">High - Urgent repair</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-3 lg:col-span-2">
+                      <label className="text-sm font-medium text-slate-700">
+                        Service Description
+                      </label>
+                      <Textarea
+                        placeholder="Describe the service needed or any specific issues..."
+                        value={newBookingForm.description}
+                        onChange={(e) => handleNewBookingFormChange("description", e.target.value)}
+                        className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 min-h-[90px] lg:min-h-[100px]"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Scheduling */}
+                <div className="space-y-3 lg:space-y-4">
+                  <h4 className="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-blue-500" />
+                    Preferred Scheduling
+                  </h4>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-slate-700">
+                        Preferred Date
+                      </label>
+                      <Input
+                        type="date"
+                        value={newBookingForm.preferredDate}
+                        onChange={(e) => handleNewBookingFormChange("preferredDate", e.target.value)}
+                        className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10"
+                      />
+                    </div>
+                    <div className="space-y-3">
+                      <label className="text-sm font-medium text-slate-700">
+                        Preferred Time
+                      </label>
+                      <Select
+                        value={newBookingForm.preferredTime}
+                        onValueChange={(value) => handleNewBookingFormChange("preferredTime", value)}
+                      >
+                        <SelectTrigger className="bg-white border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 h-10">
+                          <SelectValue placeholder="Select time slot" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="8:00">8:00 AM</SelectItem>
+                          <SelectItem value="9:00">9:00 AM</SelectItem>
+                          <SelectItem value="10:00">10:00 AM</SelectItem>
+                          <SelectItem value="11:00">11:00 AM</SelectItem>
+                          <SelectItem value="12:00">12:00 PM</SelectItem>
+                          <SelectItem value="13:00">1:00 PM</SelectItem>
+                          <SelectItem value="14:00">2:00 PM</SelectItem>
+                          <SelectItem value="15:00">3:00 PM</SelectItem>
+                          <SelectItem value="16:00">4:00 PM</SelectItem>
+                          <SelectItem value="17:00">5:00 PM</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex-shrink-0 border-t border-slate-100 p-4 md:p-6">
+              <div className="flex flex-col sm:flex-row gap-3 sm:justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => setNewBookingOpen(false)}
+                  className="border-slate-200 text-slate-600 hover:bg-slate-50"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleNewBookingSubmit}
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Booking
+                </Button>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
