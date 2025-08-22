@@ -90,7 +90,7 @@ const getNavigationItems = () => {
   ).length;
 
   return [
-    { id: "overview", icon: Home, label: "Overview" },
+    { id: "overview", icon: Home, label: "Command Center" },
     {
       id: "bookings",
       icon: Calendar,
@@ -1837,7 +1837,7 @@ ${newBookingForm.customerEmail ? `📧 Email confirmation sent to: ${newBookingF
             <div className="min-w-0 flex-1">
               <h1 className="text-xl md:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-700 to-amber-600 bg-clip-text text-transparent truncate">
                 {currentPage === "overview"
-                  ? "Overview"
+                  ? "Command Center"
                   : currentPage === "services"
                   ? "Service Menu"
                   : currentPage === "bookings"
@@ -1850,7 +1850,7 @@ ${newBookingForm.customerEmail ? `📧 Email confirmation sent to: ${newBookingF
               </h1>
               <p className="text-slate-600 text-xs md:text-sm mt-1 line-clamp-2">
                 {currentPage === "overview"
-                  ? "Welcome back! Here's what's happening at your shop today."
+                  ? "Your shop's mission control. Monitor operations, track performance, and stay ahead of the game."
                   : currentPage === "bookings"
                   ? "Streamline appointments and optimize your service workflow for maximum efficiency."
                   : currentPage === "services"

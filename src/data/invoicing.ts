@@ -1,4 +1,4 @@
-import { FinancialSummary, Transaction } from "@/types/invoice";
+import { FinancialSummary, Transaction, Invoice } from "@/types/invoice";
 
 // Mock financial data
 export const mockFinancialSummary: FinancialSummary = {
@@ -131,6 +131,254 @@ export const mockTransactions: Transaction[] = [
     status: "pending_payout",
     escrowReleaseDate: "2025-08-25T00:00:00Z",
   },
+];
+
+// Mock recent invoices data
+export const mockRecentInvoices: Invoice[] = [
+  {
+    id: "inv-001",
+    invoiceNumber: "INV-20250822-001",
+    jobId: "job-001",
+    customerId: "cust-001",
+    customerName: "Emily Watson",
+    customerEmail: "emily.watson@email.com",
+    vehicleInfo: {
+      year: 2020,
+      make: "Honda",
+      model: "Civic",
+      registration: "ABC123"
+    },
+    lineItems: [
+      {
+        id: "line-001",
+        description: "Brake Pad Replacement",
+        quantity: 1,
+        unitPrice: 180.00,
+        total: 180.00,
+        type: "labor"
+      },
+      {
+        id: "line-002",
+        description: "Brake Pads - Front Set",
+        quantity: 1,
+        unitPrice: 120.00,
+        total: 120.00,
+        type: "parts"
+      },
+      {
+        id: "line-003",
+        description: "Brake Fluid Top-up",
+        quantity: 1,
+        unitPrice: 25.00,
+        total: 25.00,
+        type: "additional"
+      }
+    ],
+    subtotal: 325.00,
+    gstAmount: 32.50,
+    gstRate: 0.10,
+    total: 357.50,
+    status: "sent",
+    createdAt: "2025-08-22T09:15:00Z",
+    sentAt: "2025-08-22T09:30:00Z",
+    dueDate: "2025-09-05T00:00:00Z",
+    notes: "Customer requested brake inspection - pads were worn beyond safe limits"
+  },
+  {
+    id: "inv-002",
+    invoiceNumber: "INV-20250821-002",
+    jobId: "job-002",
+    customerId: "cust-002",
+    customerName: "Robert Taylor",
+    customerEmail: "robert.taylor@email.com",
+    vehicleInfo: {
+      year: 2019,
+      make: "Ford",
+      model: "Focus",
+      registration: "DEF456"
+    },
+    lineItems: [
+      {
+        id: "line-004",
+        description: "Oil Change Service",
+        quantity: 1,
+        unitPrice: 80.00,
+        total: 80.00,
+        type: "labor"
+      },
+      {
+        id: "line-005",
+        description: "Engine Oil - 5W30 Synthetic",
+        quantity: 5,
+        unitPrice: 12.00,
+        total: 60.00,
+        type: "parts"
+      },
+      {
+        id: "line-006",
+        description: "Oil Filter",
+        quantity: 1,
+        unitPrice: 15.00,
+        total: 15.00,
+        type: "parts"
+      }
+    ],
+    subtotal: 155.00,
+    gstAmount: 15.50,
+    gstRate: 0.10,
+    total: 170.50,
+    status: "paid",
+    createdAt: "2025-08-21T14:20:00Z",
+    sentAt: "2025-08-21T14:30:00Z",
+    paidAt: "2025-08-21T16:45:00Z",
+    dueDate: "2025-09-04T00:00:00Z"
+  },
+  {
+    id: "inv-003",
+    invoiceNumber: "INV-20250820-003",
+    jobId: "job-003",
+    customerId: "cust-003",
+    customerName: "Lisa Johnson",
+    customerEmail: "lisa.johnson@email.com",
+    vehicleInfo: {
+      year: 2020,
+      make: "Honda",
+      model: "Civic",
+      registration: "GHI789"
+    },
+    lineItems: [
+      {
+        id: "line-007",
+        description: "Diagnostic Scan & Inspection",
+        quantity: 1,
+        unitPrice: 120.00,
+        total: 120.00,
+        type: "labor"
+      },
+      {
+        id: "line-008",
+        description: "Engine Mount Replacement",
+        quantity: 2,
+        unitPrice: 180.00,
+        total: 360.00,
+        type: "labor"
+      },
+      {
+        id: "line-009",
+        description: "Engine Mount - Left Side",
+        quantity: 1,
+        unitPrice: 85.00,
+        total: 85.00,
+        type: "parts"
+      },
+      {
+        id: "line-010",
+        description: "Engine Mount - Right Side",
+        quantity: 1,
+        unitPrice: 85.00,
+        total: 85.00,
+        type: "parts"
+      }
+    ],
+    subtotal: 650.00,
+    gstAmount: 65.00,
+    gstRate: 0.10,
+    total: 715.00,
+    status: "overdue",
+    createdAt: "2025-08-20T11:00:00Z",
+    sentAt: "2025-08-20T11:15:00Z",
+    dueDate: "2025-08-27T00:00:00Z",
+    notes: "Customer reported excessive engine vibration - found worn engine mounts"
+  },
+  {
+    id: "inv-004",
+    invoiceNumber: "INV-20250819-004",
+    jobId: "job-004",
+    customerId: "cust-004",
+    customerName: "Angela Foster",
+    customerEmail: "angela.foster@email.com",
+    vehicleInfo: {
+      year: 2020,
+      make: "Nissan",
+      model: "Navara",
+      registration: "JKL012"
+    },
+    lineItems: [
+      {
+        id: "line-011",
+        description: "Tire Rotation & Balance",
+        quantity: 1,
+        unitPrice: 120.00,
+        total: 120.00,
+        type: "labor"
+      },
+      {
+        id: "line-012",
+        description: "Wheel Alignment",
+        quantity: 1,
+        unitPrice: 180.00,
+        total: 180.00,
+        type: "labor"
+      }
+    ],
+    subtotal: 300.00,
+    gstAmount: 30.00,
+    gstRate: 0.10,
+    total: 330.00,
+    status: "draft",
+    createdAt: "2025-08-19T16:30:00Z",
+    dueDate: "2025-09-02T00:00:00Z",
+    notes: "Vehicle showing signs of uneven tire wear - alignment recommended"
+  },
+  {
+    id: "inv-005",
+    invoiceNumber: "INV-20250818-005",
+    jobId: "job-005",
+    customerId: "cust-005",
+    customerName: "Michael Chen",
+    customerEmail: "michael.chen@email.com",
+    vehicleInfo: {
+      year: 2018,
+      make: "Toyota",
+      model: "Camry",
+      registration: "MNO345"
+    },
+    lineItems: [
+      {
+        id: "line-013",
+        description: "Air Conditioning Service",
+        quantity: 1,
+        unitPrice: 150.00,
+        total: 150.00,
+        type: "labor"
+      },
+      {
+        id: "line-014",
+        description: "A/C Refrigerant R134a",
+        quantity: 2,
+        unitPrice: 45.00,
+        total: 90.00,
+        type: "parts"
+      },
+      {
+        id: "line-015",
+        description: "Cabin Air Filter",
+        quantity: 1,
+        unitPrice: 25.00,
+        total: 25.00,
+        type: "parts"
+      }
+    ],
+    subtotal: 265.00,
+    gstAmount: 26.50,
+    gstRate: 0.10,
+    total: 291.50,
+    status: "paid",
+    createdAt: "2025-08-18T13:45:00Z",
+    sentAt: "2025-08-18T14:00:00Z",
+    paidAt: "2025-08-19T10:30:00Z",
+    dueDate: "2025-09-01T00:00:00Z"
+  }
 ];
 
 // Helper function to export transactions to CSV

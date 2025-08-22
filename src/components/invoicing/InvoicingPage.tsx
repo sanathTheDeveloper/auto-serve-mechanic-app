@@ -20,6 +20,7 @@ import {
 import {
   mockFinancialSummary,
   mockTransactions,
+  mockRecentInvoices,
   exportTransactionsToCSV,
 } from "@/data/invoicing";
 import { Invoice, Transaction } from "@/types/invoice";
@@ -35,7 +36,7 @@ export function InvoicingPage({}: InvoicingPageProps) {
   const [transactions, setTransactions] = useState(mockTransactions);
   const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
-  const [recentInvoices, setRecentInvoices] = useState<Invoice[]>([]);
+  const [recentInvoices, setRecentInvoices] = useState<Invoice[]>(mockRecentInvoices);
 
   const handleCreateInvoice = useCallback(
     (invoice: Invoice) => {
@@ -144,12 +145,14 @@ export function InvoicingPage({}: InvoicingPageProps) {
   };
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-6 lg:space-y-8 xl:space-y-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Financial Overview Cards */}
-      <FinancialStatsCards financialData={financialData} />
+      <div className="mt-2 lg:mt-4">
+        <FinancialStatsCards financialData={financialData} />
+      </div>
 
       {/* Payment Status & Recent Invoices */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* Payment Status Overview */}
         <Card className="bg-white/95 backdrop-blur-sm shadow-lg border border-blue-200/50">
           <CardHeader className="p-4 lg:p-5">
@@ -264,38 +267,70 @@ export function InvoicingPage({}: InvoicingPageProps) {
                 </p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 lg:space-y-4">
                 {recentInvoices.slice(0, 3).map((invoice) => (
                   <div
                     key={invoice.id}
-                    className="flex items-center justify-between p-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                    className="group bg-gradient-to-r from-white to-slate-50/50 border border-slate-200/80 rounded-lg lg:rounded-xl p-3 lg:p-4 hover:shadow-md hover:border-blue-200/60 transition-all duration-200 cursor-pointer"
                   >
-                    <div className="flex items-center gap-3">
-                      {getStatusIcon(invoice.status)}
-                      <div>
-                        <p className="font-medium text-slate-800">
-                          {invoice.customerName}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm text-slate-500 font-mono">
-                            {invoice.invoiceNumber}
-                          </span>
-                          {getStatusBadge(invoice.status)}
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3 min-w-0 flex-1">
+                        <div className="flex-shrink-0 mt-0.5">
+                          {getStatusIcon(invoice.status)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="min-w-0 flex-1">
+                              <h4 className="font-semibold text-slate-800 lg:text-base text-sm truncate">
+                                {invoice.customerName}
+                              </h4>
+                              <p className="text-xs lg:text-sm text-slate-600 truncate">
+                                {invoice.vehicleInfo.year} {invoice.vehicleInfo.make} {invoice.vehicleInfo.model}
+                              </p>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              <p className="font-bold text-slate-800 lg:text-lg text-base">
+                                {formatCurrency(invoice.total)}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                {new Date(invoice.createdAt).toLocaleDateString('en-AU', {
+                                  month: 'short',
+                                  day: 'numeric'
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0 flex-1">
+                              <span className="text-xs lg:text-sm text-slate-500 font-mono truncate">
+                                {invoice.invoiceNumber}
+                              </span>
+                              {getStatusBadge(invoice.status)}
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-7 lg:h-8 px-2 lg:px-3 text-xs lg:text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <Eye className="h-3 w-3 lg:h-4 lg:w-4 mr-1" />
+                              <span className="hidden sm:inline">View</span>
+                            </Button>
+                          </div>
+                          
+                          {/* Service Summary */}
+                          <div className="mt-2 pt-2 border-t border-slate-100">
+                            <p className="text-xs lg:text-sm text-slate-600 truncate">
+                              {invoice.lineItems[0]?.description}
+                              {invoice.lineItems.length > 1 && (
+                                <span className="text-slate-400 ml-1">
+                                  +{invoice.lineItems.length - 1} more
+                                </span>
+                              )}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-slate-800">
-                        {formatCurrency(invoice.total)}
-                      </p>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-xs"
-                      >
-                        <Eye className="h-3 w-3 mr-1" />
-                        View
-                      </Button>
                     </div>
                   </div>
                 ))}
@@ -306,10 +341,12 @@ export function InvoicingPage({}: InvoicingPageProps) {
       </div>
 
       {/* Transaction History Table */}
-      <TransactionHistoryTable
-        transactions={transactions}
-        onExportCSV={handleExportCSV}
-      />
+      <div className="mt-8 lg:mt-10">
+        <TransactionHistoryTable
+          transactions={transactions}
+          onExportCSV={handleExportCSV}
+        />
+      </div>
 
       {/* Invoice Creation Dialog */}
       <InvoiceCreationDialog
