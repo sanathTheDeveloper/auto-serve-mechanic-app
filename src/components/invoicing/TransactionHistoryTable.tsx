@@ -258,7 +258,7 @@ export function TransactionHistoryTable({
               <div className="space-y-2">
                 <h3 className="text-xl font-semibold text-slate-700">No transactions found</h3>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  Try adjusting your search criteria, status filter, or date range to find the transactions you're looking for.
+                  Try adjusting your search criteria, status filter, or date range to find the transactions you&apos;re looking for.
                 </p>
               </div>
             </div>
@@ -268,7 +268,7 @@ export function TransactionHistoryTable({
             {/* Mobile/Tablet Card Layout */}
             <div className="block lg:hidden px-2 sm:px-4">
               <div className="space-y-4">
-                {paginatedTransactions.map((transaction, index) => (
+                {paginatedTransactions.map((transaction) => (
                   <div
                     key={transaction.id}
                     className="bg-gradient-to-r from-white to-slate-50/30 border border-slate-200/80 rounded-xl p-4 sm:p-5 hover:shadow-lg hover:border-blue-200/60 transition-all duration-300"
