@@ -1034,14 +1034,14 @@ ${newBookingForm.customerEmail ? `📧 Email confirmation sent to: ${newBookingF
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 md:gap-6">
               {/* Today's Schedule - Enhanced with Actionable Cards */}
               <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50 xl:col-span-3">
-                <CardHeader className="p-4 md:p-6">
+                <CardHeader className="px-4 md:px-6 pt-4 md:pt-6 pb-2 md:pb-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <CardTitle className="text-base md:text-lg font-semibold text-slate-800 flex items-center gap-2">
                         <Calendar className="h-4 w-4 md:h-5 md:w-5 text-blue-500 flex-shrink-0" />
                         <span className="truncate">Today&apos;s Schedule</span>
                       </CardTitle>
-                      <p className="text-xs md:text-sm text-slate-600 mt-1">
+                      <p className="text-xs md:text-sm text-slate-600 -mt-1">
                         {getTodaysBookings().length} bookings scheduled •{" "}
                         {
                           getTodaysBookings().filter(
@@ -1063,7 +1063,7 @@ ${newBookingForm.customerEmail ? `📧 Email confirmation sent to: ${newBookingF
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent className="p-4 md:p-6 pt-0">
+                <CardContent className="px-4 md:px-6 pb-4 md:pb-6 pt-0">
                   {getTodaysBookings().length === 0 ? (
                     <div className="text-center py-8 text-slate-500">
                       <Calendar className="h-12 w-12 mx-auto mb-3 text-slate-300" />
@@ -1154,85 +1154,94 @@ ${newBookingForm.customerEmail ? `📧 Email confirmation sent to: ${newBookingF
 
               {/* Workshop Status - Mechanic Focused */}
               <Card className="bg-white/90 backdrop-blur-sm shadow-lg border border-blue-200/50 h-fit">
-                <CardContent className="p-4 xl:p-5">
-                  <h3 className="text-sm xl:text-base font-semibold text-slate-800 mb-3 flex items-center gap-2">
-                    <Wrench className="h-4 w-4 text-blue-500" />
+                <CardContent className="p-4 xl:p-6">
+                  <h3 className="text-sm xl:text-lg font-semibold text-slate-800 mb-4 xl:mb-5 flex items-center gap-2">
+                    <Wrench className="h-4 w-4 xl:h-5 xl:w-5 text-blue-500" />
                     Workshop Status
                   </h3>
                   
                   {/* Active Jobs Progress */}
-                  <div className="space-y-3 mb-4">
-                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-medium text-purple-700">Jobs In Progress</span>
-                        <Badge className="bg-purple-100 text-purple-800 text-xs">
+                  <div className="space-y-3 xl:space-y-4 mb-4 xl:mb-6">
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 xl:p-4">
+                      <div className="flex items-center justify-between mb-2 xl:mb-3">
+                        <span className="text-xs xl:text-sm font-medium text-purple-700">Jobs In Progress</span>
+                        <Badge className="bg-purple-100 text-purple-800 text-xs xl:text-sm">
                           {getTodaysBookings().filter(j => j.stage === "in-progress").length} Active
                         </Badge>
                       </div>
                       {getTodaysBookings().filter(j => j.stage === "in-progress").length > 0 ? (
-                        <div className="space-y-1.5">
+                        <div className="space-y-2 xl:space-y-3">
                           {getTodaysBookings()
                             .filter(j => j.stage === "in-progress")
                             .slice(0, 2)
                             .map(job => (
-                              <div key={job.id} className="flex items-center justify-between text-xs">
-                                <span className="text-purple-700 truncate">{job.customer} - {job.vehicle}</span>
-                                <span className="text-purple-600 font-medium">{job.bay}</span>
+                              <div key={job.id} className="bg-white/70 rounded-md p-2 xl:p-2.5">
+                                <div className="flex items-center justify-between">
+                                  <div className="min-w-0 flex-1">
+                                    <div className="text-xs xl:text-sm font-medium text-purple-800 truncate">{job.customer}</div>
+                                    <div className="text-xs text-purple-600 truncate">{job.vehicle}</div>
+                                  </div>
+                                  <Badge className="bg-purple-200 text-purple-800 text-xs font-medium ml-2 flex-shrink-0">
+                                    {job.bay}
+                                  </Badge>
+                                </div>
                               </div>
                             ))}
                         </div>
                       ) : (
-                        <p className="text-xs text-purple-600">No jobs currently in progress</p>
+                        <p className="text-xs xl:text-sm text-purple-600 text-center py-2">No jobs currently in progress</p>
                       )}
                     </div>
 
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-medium text-amber-700">Quotes Pending</span>
-                        <Badge className="bg-amber-100 text-amber-800 text-xs">
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 xl:p-4">
+                      <div className="flex items-center justify-between mb-2 xl:mb-3">
+                        <span className="text-xs xl:text-sm font-medium text-amber-700">Quotes Pending</span>
+                        <Badge className="bg-amber-100 text-amber-800 text-xs xl:text-sm">
                           {getTodaysBookings().filter(j => j.stage === "quote-requested" || j.stage === "quote-sent").length} Jobs
                         </Badge>
                       </div>
                       {getTodaysBookings().filter(j => j.stage === "quote-requested" || j.stage === "quote-sent").length > 0 ? (
-                        <div className="space-y-1.5">
+                        <div className="space-y-2 xl:space-y-3">
                           {getTodaysBookings()
                             .filter(j => j.stage === "quote-requested" || j.stage === "quote-sent")
                             .slice(0, 2)
                             .map(job => (
-                              <div key={job.id} className="flex items-center justify-between text-xs">
-                                <span className="text-amber-700 truncate">{job.customer}</span>
-                                <span className="text-amber-600 font-medium">{job.stage === "quote-sent" ? "Sent" : "Pending"}</span>
+                              <div key={job.id} className="bg-white/70 rounded-md p-2 xl:p-2.5 flex items-center justify-between">
+                                <span className="text-xs xl:text-sm font-medium text-amber-800 truncate flex-1">{job.customer}</span>
+                                <Badge className="bg-amber-200 text-amber-800 text-xs font-medium ml-2 flex-shrink-0">
+                                  {job.stage === "quote-sent" ? "Sent" : "Pending"}
+                                </Badge>
                               </div>
                             ))}
                         </div>
                       ) : (
-                        <p className="text-xs text-amber-600">No pending quotes</p>
+                        <p className="text-xs xl:text-sm text-amber-600 text-center py-2">No pending quotes</p>
                       )}
                     </div>
                   </div>
 
                   {/* Service Bay Status */}
-                  <div className="border-t border-slate-200 pt-3">
-                    <h4 className="text-xs xl:text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1">
-                      <MapPin className="h-3 w-3" />
+                  <div className="border-t border-slate-200 pt-3 xl:pt-4">
+                    <h4 className="text-xs xl:text-sm font-semibold text-slate-700 mb-2 xl:mb-3 flex items-center gap-1">
+                      <MapPin className="h-3 w-3 xl:h-4 xl:w-4" />
                       Service Bays
                     </h4>
-                    <div className="grid grid-cols-1 gap-1.5">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-slate-600">Bay 1 - Diagnostics</span>
-                        <Badge className="bg-green-100 text-green-800 text-xs px-1.5 py-0.5">
+                    <div className="grid grid-cols-1 gap-2 xl:gap-3">
+                      <div className="bg-slate-50 rounded-md p-2 xl:p-2.5 flex justify-between items-center">
+                        <span className="text-xs xl:text-sm text-slate-700 font-medium">Bay 1 - Diagnostics</span>
+                        <Badge className="bg-green-100 text-green-800 text-xs xl:text-sm px-2 py-1">
                           Available
                         </Badge>
                       </div>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-slate-600">Bay 2 - General Service</span>
-                        <Badge className="bg-blue-100 text-blue-800 text-xs px-1.5 py-0.5">
+                      <div className="bg-slate-50 rounded-md p-2 xl:p-2.5 flex justify-between items-center">
+                        <span className="text-xs xl:text-sm text-slate-700 font-medium">Bay 2 - General Service</span>
+                        <Badge className="bg-blue-100 text-blue-800 text-xs xl:text-sm px-2 py-1">
                           Occupied
                         </Badge>
                       </div>
-                      <div className="flex justify-between text-xs">
-                        <span className="text-slate-600">Bay 3 - Heavy Repair</span>
-                        <Badge className="bg-amber-100 text-amber-800 text-xs px-1.5 py-0.5">
+                      <div className="bg-slate-50 rounded-md p-2 xl:p-2.5 flex justify-between items-center">
+                        <span className="text-xs xl:text-sm text-slate-700 font-medium">Bay 3 - Heavy Repair</span>
+                        <Badge className="bg-amber-100 text-amber-800 text-xs xl:text-sm px-2 py-1">
                           Reserved
                         </Badge>
                       </div>
@@ -1240,23 +1249,29 @@ ${newBookingForm.customerEmail ? `📧 Email confirmation sent to: ${newBookingF
                   </div>
 
                   {/* Tools & Equipment Status */}
-                  <div className="mt-4 pt-3 border-t border-slate-200">
-                    <h4 className="text-xs xl:text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1">
-                      <Hammer className="h-3 w-3" />
+                  <div className="mt-4 xl:mt-5 pt-3 xl:pt-4 border-t border-slate-200">
+                    <h4 className="text-xs xl:text-sm font-semibold text-slate-700 mb-2 xl:mb-3 flex items-center gap-1">
+                      <Hammer className="h-3 w-3 xl:h-4 xl:w-4" />
                       Equipment Status
                     </h4>
-                    <div className="space-y-1.5 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-slate-600">Vehicle Lift #1</span>
-                        <span className="font-medium text-green-600">Operational</span>
+                    <div className="space-y-2 xl:space-y-3">
+                      <div className="bg-slate-50 rounded-md p-2 xl:p-2.5 flex justify-between items-center">
+                        <span className="text-xs xl:text-sm text-slate-700 font-medium">Vehicle Lift #1</span>
+                        <Badge className="bg-green-100 text-green-700 text-xs xl:text-sm px-2 py-1">
+                          Operational
+                        </Badge>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-600">Diagnostic Scanner</span>
-                        <span className="font-medium text-green-600">Available</span>
+                      <div className="bg-slate-50 rounded-md p-2 xl:p-2.5 flex justify-between items-center">
+                        <span className="text-xs xl:text-sm text-slate-700 font-medium">Diagnostic Scanner</span>
+                        <Badge className="bg-green-100 text-green-700 text-xs xl:text-sm px-2 py-1">
+                          Available
+                        </Badge>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-slate-600">Alignment Machine</span>
-                        <span className="font-medium text-amber-600">In Use</span>
+                      <div className="bg-slate-50 rounded-md p-2 xl:p-2.5 flex justify-between items-center">
+                        <span className="text-xs xl:text-sm text-slate-700 font-medium">Alignment Machine</span>
+                        <Badge className="bg-amber-100 text-amber-700 text-xs xl:text-sm px-2 py-1">
+                          In Use
+                        </Badge>
                       </div>
                     </div>
                   </div>
